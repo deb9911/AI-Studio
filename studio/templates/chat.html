@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ agent | capitalize }} Chat</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="with-bg">
+    <div class="sidebar">
+        <h2>Chat Agents</h2>
+        <a href="/chat/groq">Groq (LLaMA3)</a>
+        <a href="/chat/together">Together.ai</a>
+        <a href="/">← Home</a>
+    </div>
+
+    <div class="chat-container">
+
+        {% if response %}
+        <div class="message-card user">
+            <strong>You:</strong><br>{{ user_input }}
+        </div>
+        <div class="message-card ai">
+            <strong>AI:</strong><br>{{ response }}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <form method="post" class="input-form">
+        <textarea name="user_input" rows="2" placeholder="Send a message..." autofocus required></textarea>
+        <button type="submit">➤</button>
+    </form>
+</body>
+</html>
