@@ -1,18 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Studio</title>
+    <title>AI Studio Dashboard</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body class="with-bg">
-    <div class="sidebar">
-        <h2>Chat Agents</h2>
-        <a href="/chat/groq">Groq (LLaMA3)</a>
-        <a href="/chat/together">Together.ai</a>
+<body class="with-bg no-sidebar">
+    <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
+    <div class="dashboard-container">
+        <h1>🧠 Welcome to AI Studio</h1>
+        <p>Select a model or service to get started.</p>
+
+        <div class="card-grid">
+            <div class="info-card">
+                <h2>Groq</h2>
+                <p>Powered by LLaMA3-70B. Fast, efficient, great for chat and reasoning.</p>
+                <a href="/chat/groq">Chat Now →</a>
+            </div>
+            <div class="info-card">
+                <h2>Together.ai</h2>
+                <p>Supports Mixtral, LLaMA, and more. API aggregator for multiple open models.</p>
+                <a href="/chat/together">Chat Now →</a>
+            </div>
+            <div class="info-card coming-soon">
+                <h2>Image Generator</h2>
+                <p>Generate visuals with text prompts. Coming soon.</p>
+                <a href="#">Coming Soon</a>
+            </div>
+            <div class="info-card">
+                <h2>Your Usage</h2>
+                <p>Metering up User's usage details.</p>
+                <a href="#">Review →</a>
+            </div>
+            <div class="info-card">
+                <h2>Recommanded Models</h2>
+                <p>As per User's interest, here is a hub-space to explore more Agents.</p>
+                <a href="#">Explore →</a>
+            </div>
+        </div>
     </div>
-    <div class="main-content">
-        <h1>Welcome to Conversation AI Studio</h1>
-        <p>Select a chat model from the left pane to begin.</p>
-    </div>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+        }
+        window.onload = () => {
+            if (localStorage.getItem("theme") === "dark") {
+                document.body.classList.add("dark");
+            }
+        }
+    </script>
 </body>
 </html>

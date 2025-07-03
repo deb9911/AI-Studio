@@ -5,7 +5,9 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="with-bg">
+    <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
     <div class="sidebar">
+        <button class="sidebar-toggle" onclick="document.body.classList.toggle('collapsed')">☰</button>
         <h2>Chat Agents</h2>
         <a href="/chat/groq">Groq (LLaMA3)</a>
         <a href="/chat/together">Together.ai</a>
@@ -29,5 +31,16 @@
         <textarea name="user_input" rows="2" placeholder="Send a message..." autofocus required></textarea>
         <button type="submit">➤</button>
     </form>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+            localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+        }
+        window.onload = () => {
+            if (localStorage.getItem("theme") === "dark") {
+                document.body.classList.add("dark");
+            }
+        }
+    </script>
 </body>
 </html>
