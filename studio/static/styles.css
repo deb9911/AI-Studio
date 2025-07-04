@@ -73,7 +73,7 @@ body, html {
 
 /* === Collapsible Sidebar === */
 .sidebar-toggle {
-    position: absolute;
+    position: fixed;
     top: 10px;
     left: 230px;
     z-index: 110;
@@ -89,6 +89,7 @@ body, html {
 body.collapsed .sidebar {
     width: 60px;
     padding: 20px 10px;
+    overflow: hidden;
 }
 
 body.collapsed .sidebar-toggle {
@@ -159,6 +160,7 @@ body.no-sidebar .sidebar-toggle {
     padding: 2rem;
     padding-bottom: 100px;
     max-width: 800px;
+    transition: margin-left 0.3s ease;
 }
 
 .message-card {
@@ -193,6 +195,7 @@ body.no-sidebar .sidebar-toggle {
     gap: 10px;
     border-top: 1px solid #ddd;
     z-index: 50;
+    transition: margin-left 0.3s ease;
 }
 
 textarea {
@@ -220,4 +223,33 @@ button {
 
 button:hover {
     background-color: #0056b3;
+}
+
+.floating-word-btn {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.2s ease;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.floating-word-btn:hover {
+    background: #0056b3;
+}
+
+.message-card.ai {
+    position: relative;  /* Needed for the floating button inside */
+}
+.message-card.ai:hover .floating-word-btn {
+    opacity: 1;
+    pointer-events: auto;
 }

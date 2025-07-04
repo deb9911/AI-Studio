@@ -1,0 +1,21 @@
+{
+    "groq": {
+        "label": "Groq (LLaMA3)",
+        "type": "api",
+        "module": "chat_client.groq_client",
+        "function": "chat_with_groq"
+    },
+    "together": {
+        "label": "Together.ai",
+        "type": "api",
+        "module": "chat_client.together_ai",
+        "function": "chat_with_together"
+    },
+    "huggingface": {
+        "label": "Hugging Face (Zephyr)",
+        "type": "api",
+        "module": "chat_client.hf_client",
+        "function": "chat_with_hf",
+        "model_name": "HuggingFaceH4/zephyr-7b-beta"
+    }
+}
