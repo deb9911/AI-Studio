@@ -33,15 +33,17 @@ body, html {
     font-family: "Segoe UI", sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
+    height: 100%;
 }
 
 .with-bg {
-    background: url('/static/ai-studio-dark-bg-main_1.png') no-repeat center center fixed;
+    background: url('/static/ai-studio-dark-bg-main_2.png') no-repeat center center fixed;
     background-size: cover;
     /*background-color: #f5f5f5; /* fallback color */
 }
 .dark.with-bg {
-    background-image: url('/static/ai-studio-dark-bg-main_3.png');
+    background: url('/static/ai-studio-dark-bg-main_3.png') no-repeat center center fixed;
+    background-size: cover;
 }
 
 /* === Sidebar === */
@@ -51,7 +53,8 @@ body, html {
     left: 0;
     width: 220px;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: var(--card-bg);
+    color: var(--text-color);
     padding: 20px;
     box-shadow: 2px 0 6px rgba(0,0,0,0.1);
     transition: width 0.3s ease;
@@ -86,6 +89,10 @@ body, html {
     transition: left 0.3s ease;
 }
 
+.sidebar, .input-form {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 body.collapsed .sidebar {
     width: 60px;
     padding: 20px 10px;
@@ -108,6 +115,12 @@ body.no-sidebar .sidebar-toggle {
 }
 
 /* === Dashboard === */
+.dashboard-container h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
 .dashboard-container {
     padding: 3rem;
     margin-left: 0;
@@ -161,10 +174,22 @@ body.no-sidebar .sidebar-toggle {
     padding-bottom: 100px;
     max-width: 800px;
     transition: margin-left 0.3s ease;
+    background-color: transparent;
+}
+
+.empty-placeholder {
+    min-height: 60vh;
+    margin-left: 240px;
+    transition: margin-left 0.3s ease;
+    background-color: transparent;
+    background-image: none;
+}
+body.collapsed .empty-placeholder {
+    margin-left: 80px;
 }
 
 .message-card {
-    background: var(--card-bg);
+    background: rgba(255, 255, 255, 0.8);
     color: var(--text-color);
     border-radius: 12px;
     padding: 1rem;
@@ -174,12 +199,15 @@ body.no-sidebar .sidebar-toggle {
     white-space: pre-wrap;
 }
 
+body.dark .message-card {
+    background: rgba(44, 44, 44, 0.8); /* dark mode */
+}
+
 .user {
     border-left: 5px solid var(--primary-color);
 }
 
 .ai {
-    background-color: var(--card-bg);
     border-left: 5px solid #28a745; /* or make a --ai-border if needed */
 }
 
@@ -189,11 +217,11 @@ body.no-sidebar .sidebar-toggle {
     bottom: 0;
     left: 240px;
     right: 0;
-    background: #ffffff;
+    background: var(--card-bg);
     padding: 10px 20px;
     display: flex;
     gap: 10px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--card-border);
     z-index: 50;
     transition: margin-left 0.3s ease;
 }
@@ -201,12 +229,22 @@ body.no-sidebar .sidebar-toggle {
 textarea {
     flex: 1;
     resize: none;
-    padding: 10px;
+    padding: 10px 16px;
     font-size: 16px;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--card-border);
+    background-color: var(--card-bg);
+    color: var(--text-color);
     height: 48px;
     max-height: 100px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+textarea::placeholder {
+    color: var(--text-color);
+    opacity: 0.4;
 }
 
 button {
@@ -227,27 +265,25 @@ button:hover {
 
 .floating-word-btn {
     position: absolute;
-    right: 20px;
     top: 10px;
+    right: 10px;
     background: var(--primary-color);
     border: none;
     color: white;
-    font-size: 14px;
-    padding: 6px 10px;
+    font-size: 12px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     cursor: pointer;
-    transition: 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 10;
     opacity: 0;
     pointer-events: none;
 }
-
-.floating-word-btn:hover {
-    background: #0056b3;
-}
-
 .message-card.ai {
-    position: relative;  /* Needed for the floating button inside */
+    position: relative;
 }
 .message-card.ai:hover .floating-word-btn {
     opacity: 1;

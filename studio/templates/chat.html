@@ -3,6 +3,11 @@
 <head>
     <title>{{ agent | capitalize }} Chat</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark");
+        }
+    </script>
 </head>
 <body class="with-bg">
     <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
@@ -15,28 +20,22 @@
     </div>
     <button class="sidebar-toggle" onclick="document.body.classList.toggle('collapsed')">☰</button>
     <div class="chat-container">
-
         {% if response %}
         <div class="message-card user">
             <strong>You:</strong><br>{{ user_input }}
         </div>
         <div class="message-card ai">
             <strong>AI:</strong><br>{{ response }}
-
-            <form method="post" action="/generate-doc">
-                <input type="hidden" name="content" value="{{ response }}">
-                <button class="floating-word-btn" type="submit" title="Download Word">
-                    📄
-                </button>
-            </form>
+            <button class="floating-word-btn" title="Generate Doc">W</button>
         </div>
+        {% else %}
+        <div class="empty-placeholder"></div>
         {% endif %}
-
     </div>
 
     <form method="post" class="input-form">
-        <textarea name="user_input" rows="2" placeholder="Send a message..." autofocus required></textarea>
-        <button type="submit">➤</button>
+        <textarea name="user_input" id="user_input" rows="2" placeholder="Send a message..." required></textarea>
+        <button type="submit" onclick="submitChat()">➤</button>
     </form>
     <script>
         function toggleTheme() {
@@ -47,7 +46,16 @@
             if (localStorage.getItem("theme") === "dark") {
                 document.body.classList.add("dark");
             }
-        }
-    </script>
-</body>
+            const textarea = document.getElementById("user_input");
+            if (textarea) {
+                textarea.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        this.form.submit(); // submits the form
+                        }
+                    });
+                }
+            };
+        </script>
+    </body>
 </html>
