@@ -69,7 +69,7 @@ TOGETHER_API_KEY=your_together_key_here
 
 ## 🧪 Run the App
 ```
-uvicorn studio.main:app --reload
+uvicorn studio.main:app --port 8030 --reload
 ```
 
 
@@ -79,3 +79,5 @@ Preview chats
 
 ![alt text](image-1.png)
 
+
+## Tailwind integration for Studio app beautification. 
