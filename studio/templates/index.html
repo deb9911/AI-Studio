@@ -1,63 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>AI Studio Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007bff',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/styles.css" />
     <script>
         if (localStorage.getItem("theme") === "dark") {
-            document.body.classList.add("dark");
+            document.documentElement.classList.add("dark");
         }
     </script>
 </head>
-<body class="with-bg no-sidebar">
-    <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
-    <div class="dashboard-container">
-        <h1 className="text-gray-900 dark:text-gray-100 text-2xl font-bold">🧠 Welcome to AI Studio</h1>
-        <p>Select a model or service to get started.</p>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen no-sidebar">
 
-        <div class="card-grid">
+    <!-- Theme Toggle -->
+    <button onclick="toggleTheme()" class="fixed top-3 right-4 z-50 px-3 py-1 border-2 border-primary text-primary rounded-full bg-white dark:bg-gray-800">
+        🌓
+    </button>
+
+    <!-- Dashboard Container -->
+    <div class="max-w-6xl mx-auto py-16 px-6">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">🧠 Welcome to AI Studio</h1>
+        <p class="mb-10 text-gray-600 dark:text-gray-300">Select a model or service to get started.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for model_id, model in models.items() %}
-            <div class="info-card">
-                <h2>{{ model.label }}</h2>
-                <p>
+            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6 transition-transform hover:-translate-y-1 hover:shadow-lg">
+                <h2 class="text-xl font-semibold text-primary mb-2">{{ model.label }}</h2>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
                     {% if model.description %}
                         {{ model.description }}
                     {% else %}
                         A powerful AI model accessible via API.
                     {% endif %}
                 </p>
-                <a href="/chat/{{ model_id }}">Chat Now →</a>
+                <a href="/chat/{{ model_id }}" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Chat Now →</a>
             </div>
             {% endfor %}
 
-            <div class="info-card coming-soon">
-                <h2>Image Generator</h2>
-                <p>Generate visuals with text prompts. Coming soon.</p>
-                <a href="#">Coming Soon</a>
+            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6 opacity-60 cursor-not-allowed">
+                <h2 class="text-xl font-semibold text-gray-400 mb-2">🎨 Image Generator</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Generate visuals with text prompts. Coming soon.</p>
+                <a href="#" class="text-gray-400">Coming Soon</a>
             </div>
-            <div class="info-card">
-                <h2>Your Usage</h2>
-                <p>Metering up User's usage details.</p>
-                <a href="#">Review →</a>
+
+            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-primary mb-2">📊 Your Usage</h2>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Metering up user's usage details.</p>
+                <a href="#" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Review →</a>
             </div>
-            <div class="info-card">
-                <h2>Recommended Models</h2>
-                <p>As per User's interest, here is a hub-space to explore more Agents.</p>
-                <a href="#">Explore →</a>
+
+            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-primary mb-2">🚀 Recommended Models</h2>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">As per your interest, here’s a hub-space to explore more Agents.</p>
+                <a href="#" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Explore →</a>
             </div>
         </div>
     </div>
 
     <script>
         function toggleTheme() {
-            document.body.classList.toggle("dark");
-            localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+            document.documentElement.classList.toggle("dark");
+            localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
         }
+
         window.onload = () => {
             if (localStorage.getItem("theme") === "dark") {
-                document.body.classList.add("dark");
+                document.documentElement.classList.add("dark");
             }
-        }
+        };
     </script>
 </body>
 </html>

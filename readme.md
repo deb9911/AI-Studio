@@ -79,3 +79,5 @@ Preview chats
 
 ![alt text](image-1.png)
 
+
+## Tailwind integration for Studio app beautification. 
