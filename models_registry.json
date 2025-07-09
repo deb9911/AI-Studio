@@ -17,5 +17,20 @@
         "module": "chat_client.hf_client",
         "function": "chat_with_hf",
         "model_name": "HuggingFaceH4/zephyr-7b-beta"
+    },
+    "llama3": {
+        "label": "LLaMA 3 (8B)",
+        "id": "meta-llama/Llama-3-8b-chat",
+        "provider": "together"
+    },
+    "mixtral": {
+        "label": "Mixtral 8x7B",
+        "id": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "provider": "together"
+    },
+    "gemma": {
+        "label": "Gemma 7B",
+        "id": "google/gemma-7b-it",
+        "provider": "together"
     }
 }

@@ -11,12 +11,20 @@ import os
 from typing import Dict, List
 
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
+from ..tools.RAG.routes import router as rag_router
+from tools. routes import router as rag_router
+from tools.markdown.routes import router as md_router
+from tools.docgen.routes import router as docgen_router
+
 
 app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+app.include_router(rag_router, prefix="/tools/rag")
+app.include_router(md_router, prefix="/tools/markdown")
+app.include_router(docgen_router, prefix="/tools/docgen")
 
 conversations_store: Dict[str, List[Dict[str, str]]] = {}  # {conversation_name: [ {"user":..., "ai":...}, ... ]}
 
