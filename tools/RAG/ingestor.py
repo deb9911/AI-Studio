@@ -37,5 +37,5 @@ def ingest():
     vectorstore.persist()
     print("🚀 Ingestion completed and saved to DB.")
 
-if __name__ == "__main__":
-    ingest()
+# if __name__ == "__main__":
+#     ingest()

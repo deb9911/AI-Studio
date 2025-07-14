@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 # GROQ_API_KEY = "gsk_test_..."  # replace with your key
 GROQ_API_KEY = os.getenv("groq-api")
