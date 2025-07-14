@@ -2,10 +2,10 @@ import requests
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 TOGETHER_API_KEY = os.getenv("together-api")
-TOGETHER_URL = "https://api.together.xyz/v1/chat/completions"
+TOGETHER_URL = os.getenv("together-url")
 
 def chat_with_together(prompt):
     headers = {

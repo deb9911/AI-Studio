@@ -1,21 +1,32 @@
 {
-    "groq": {
-        "label": "Groq (LLaMA3)",
-        "type": "api",
-        "module": "chat_client.groq_client",
-        "function": "chat_with_groq"
-    },
-    "together": {
-        "label": "Together.ai",
-        "type": "api",
-        "module": "chat_client.together_ai",
-        "function": "chat_with_together"
-    },
-    "huggingface": {
-        "label": "Hugging Face (Zephyr)",
-        "type": "api",
-        "module": "chat_client.hf_client",
-        "function": "chat_with_hf",
-        "model_name": "HuggingFaceH4/zephyr-7b-beta"
-    }
+  "llama3": {
+    "label": "LLaMA 3 (8B)",
+    "id": "meta-llama/Llama-3-8b-chat",
+    "provider": "together",
+    "type": "api"
+  },
+  "mixtral": {
+    "label": "Mixtral 8x7B",
+    "id": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+    "provider": "together",
+    "type": "api"
+  },
+  "gemma": {
+    "label": "Gemma 7B",
+    "id": "google/gemma-7b-it",
+    "provider": "together",
+    "type": "api"
+  },
+  "zephyr": {
+    "label": "Zephyr 7B Beta",
+    "id": "HuggingFaceH4/zephyr-7b-beta",
+    "provider": "huggingface",
+    "type": "api"
+  },
+  "groq-llama3": {
+    "label": "Groq LLaMA3",
+    "id": "llama3-8b-8192",
+    "provider": "groq",
+    "type": "api"
+  }
 }
