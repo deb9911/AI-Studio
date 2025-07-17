@@ -3,7 +3,13 @@ from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
-from langchain.document_loaders import TextLoader, PDFPlumberLoader, Docx2txtLoader, UnstructuredMarkdownLoader
+# from langchain.document_loaders import TextLoader, PDFPlumberLoader, Docx2txtLoader, UnstructuredMarkdownLoader
+from langchain_community.document_loaders import (
+    TextLoader,
+    PDFPlumberLoader,
+    Docx2txtLoader,
+    UnstructuredMarkdownLoader,
+)
 
 INGEST_DIR = "rag/documents"
 CHROMA_DB_DIR = "rag/chroma_db"

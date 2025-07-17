@@ -9,6 +9,7 @@ from docx import Document
 import uuid
 import os
 from typing import Dict, List
+from pathlib import Path
 
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
 from tools.RAG.rag_routes import router as rag_router
@@ -19,8 +20,9 @@ from tools.DOCGEN.docgen_routes import router as docgen_router
 app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+# templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+# app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 app.include_router(rag_router, prefix="/tools/rag")
 app.include_router(md_router, prefix="/tools/markdown")
 app.include_router(docgen_router, prefix="/tools/docgen")
@@ -48,6 +50,7 @@ async def home(request: Request):
         "request": request,
         "models": MODEL_REGISTRY
     })
+    # return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/chat/{model_id}", response_class=HTMLResponse)
