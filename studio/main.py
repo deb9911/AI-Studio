@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from fastapi import Query
@@ -11,6 +12,7 @@ import os
 from typing import Dict, List
 from pathlib import Path
 
+
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
 from tools.RAG.rag_routes import router as rag_router
 from tools.MARKDOWN.md_routes import router as md_router
@@ -19,6 +21,7 @@ from tools.DOCGEN.docgen_routes import router as docgen_router
 
 app = FastAPI()
 
+app.add_middleware(SessionMiddleware, secret_key="Shivaa@2025")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
@@ -55,12 +58,15 @@ async def home(request: Request):
 
 @app.get("/chat/{model_id}", response_class=HTMLResponse)
 async def get_chat_view(request: Request, model_id: str, conversation_name: str = Query(default=None)):
+    conversation = conversations_store.get(conversation_name, []) if conversation_name else []
+
     return templates.TemplateResponse("chat.html", {
         "request": request,
         "agent": model_id,
-        "response": None,
+        "response": None,  # No new response
         "user_input": None,
         "conversation_name": conversation_name,
+        "conversation": conversation,
         "conversations": conversations_store,
         "models": MODEL_REGISTRY
     })
@@ -76,7 +82,7 @@ async def post_chat_view(
     handler = get_model_handler(model_id)
     ai_response = handler(user_input)
 
-    # Save to conversation store
+    # Store conversation history
     if conversation_name not in conversations_store:
         conversations_store[conversation_name] = []
 
@@ -85,12 +91,15 @@ async def post_chat_view(
         "ai": ai_response
     })
 
+    conversation = conversations_store[conversation_name]
+
     return templates.TemplateResponse("chat.html", {
         "request": request,
         "agent": model_id,
         "user_input": user_input,
         "response": ai_response,
         "conversation_name": conversation_name,
+        "conversation": conversation,
         "conversations": conversations_store,
         "models": MODEL_REGISTRY
     })

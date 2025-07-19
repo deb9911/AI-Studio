@@ -1,114 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ agent | capitalize }} Chat</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#007bff',
-                    }
-                }
-            }
+{% extends "base.html" %}
+{% block title %}{{ agent | capitalize }} Chat{% endblock %}
+
+{% block content %}
+<div id="mainContent" class="ml-64 transition-all duration-200">
+  <!-- Chat Display Loop -->
+  {% for entry in conversation %}
+  <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
+    <strong>You:</strong><br>{{ entry.user }}
+  </div>
+  <div class="bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
+    <strong>AI:</strong><br>{{ entry.ai }}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Chat Form -->
+<form method="post" class="fixed bottom-0 left-64 right-0 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200" id="chatForm">
+  {% if not conversation_name %}
+  <input type="text" name="conversation_name" placeholder="Name this conversation..." required
+         class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+  {% else %}
+  <input type="hidden" name="conversation_name" value="{{ conversation_name }}" />
+  {% endif %}
+  <textarea name="user_input" id="user_input" rows="2" placeholder="Send a message..." required
+            class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 resize-none"></textarea>
+  <button type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">➤</button>
+</form>
+{% endblock %}
+
+{% block script_extra %}
+<script>
+  window.onload = () => {
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+
+    const textarea = document.getElementById("user_input");
+    if (textarea) {
+      textarea.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          this.form.submit();
         }
-    </script>
-    <link rel="stylesheet" href="/static/styles.css">
-    <script>
-        if (localStorage.getItem("theme") === "dark") {
-            document.documentElement.classList.add("dark");
-        }
-    </script>
-</head>
-<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen">
-    
-    <!-- Theme toggle -->
-    <button onclick="toggleTheme()" class="fixed top-3 right-4 z-50 px-3 py-1 border-2 border-primary text-primary rounded-full bg-white dark:bg-gray-800">🌓</button>
+      });
+    }
 
-    <!-- Sidebar -->
-    <div class="fixed top-0 left-0 h-full w-60 bg-white dark:bg-gray-800 p-4 shadow-md z-40 transition-all sidebar">
-        <a href="/" class="block text-blue-600 dark:text-blue-400 font-semibold mb-4">← Home</a>
+    // Sidebar Toggle Logic
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggleSidebarBtn');
+    const mainContent = document.getElementById('mainContent');
+    const chatForm = document.getElementById('chatForm');
 
-        <h2 class="text-sm font-bold uppercase mb-2 text-gray-700 dark:text-gray-300">🤖 Explore Agents</h2>
-        {% for id, model in models.items() %}
-        <a href="/chat/{{ id }}" class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 mb-2 hover:underline">
-            <span>🧠</span>
-            <span>{{ model.label }}</span>
-        </a>
-        {% endfor %}
-
-        <h2 onclick="toggleConvoList()" class="text-sm font-bold uppercase mt-6 cursor-pointer text-gray-700 dark:text-gray-300">
-            🗂 Conversations ⌄
-        </h2>
-        <div id="conversationList" class="pl-2 mt-2 space-y-1">
-            {% for cname in conversations.keys() %}
-            <a href="/chat/{{ agent }}?conversation_name={{ cname }}" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:underline">
-                <span>📝</span>
-                <span>{{ cname }}</span>
-            </a>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Sidebar toggle -->
-    <button class="fixed top-2 left-64 z-50 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 sidebar-toggle" onclick="document.body.classList.toggle('collapsed')">☰</button>
-
-    <!-- Chat Container -->
-    <div class="ml-64 p-6 pb-32 transition-all chat-container">
-        {% if response %}
-        <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow text-gray-900 dark:text-gray-100 border-l-4 border-blue-500">
-            <strong>You:</strong><br>{{ user_input }}
-        </div>
-        <div class="bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow text-gray-900 dark:text-gray-100 border-l-4 border-green-500 relative">
-            <strong>AI:</strong><br>{{ response }}
-            <button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary text-white text-xs flex items-center justify-center" title="Generate Doc">W</button>
-        </div>
-        {% else %}
-        <div class="text-center text-gray-400">Start a conversation</div>
-        {% endif %}
-    </div>
-
-    <!-- Input Form -->
-    <form method="post" class="fixed bottom-0 left-64 right-0 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50">
-        {% if not conversation_name %}
-        <input type="text" name="conversation_name" placeholder="Name this conversation..." required
-               class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-        {% else %}
-        <input type="hidden" name="conversation_name" value="{{ conversation_name }}" />
-        {% endif %}
-        <textarea name="user_input" id="user_input" rows="2" placeholder="Send a message..." required
-                  class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 resize-none"></textarea>
-        <button type="submit" onclick="submitChat()"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">➤</button>
-    </form>
-
-    <!-- Scripts -->
-    <script>
-        function toggleTheme() {
-            document.body.classList.toggle("dark");
-            localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-        }
-
-        function toggleConvoList() {
-            const el = document.getElementById("conversationList");
-            el.style.display = el.style.display === "none" ? "block" : "none";
-        }
-
-        window.onload = () => {
-            if (localStorage.getItem("theme") === "dark") {
-                document.body.classList.add("dark");
-            }
-            const textarea = document.getElementById("user_input");
-            if (textarea) {
-                textarea.addEventListener("keydown", function (event) {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        this.form.submit();
-                    }
-                });
-            }
-        }
-    </script>
-</body>
-</html>
+    toggleBtn.addEventListener('click', () => {
+      if (sidebar.classList.contains('translate-x-[-100%]')) {
+        sidebar.classList.remove('translate-x-[-100%]');
+        mainContent.classList.add('ml-64');
+        chatForm.classList.add('left-64');
+      } else {
+        sidebar.classList.add('translate-x-[-100%]');
+        mainContent.classList.remove('ml-64');
+        chatForm.classList.remove('left-64');
+      }
+    });
+  };
+</script>
+{% endblock %}
