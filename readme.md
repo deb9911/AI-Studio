@@ -71,6 +71,24 @@ TOGETHER_API_KEY=your_together_key_here
 ```
 uvicorn studio.main:app --port 8030 --reload
 ```
+## Application Updates
+### Dashboard
+![alt text](image.png)
 
+### Dashboard with toggle
+![alt text](image-1.png)
+
+### Conversation - Context management 
+![alt text](image-2.png) 
+
+### Application utilities & customize experience for a better accessability. 
+![alt text](image-3.png)
+
+#### For a better experience, application is build in a light weight manner. 
+![alt text](image-4.png)
 
 ## Tailwind integration for Studio app beautification. 
+
+* Tailwind adopted. 
+* Multiple sideload has added. 
+* Modularize & saperating different sub features as a microservice so application load time will be reduced. 
