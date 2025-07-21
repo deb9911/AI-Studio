@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}KUCHU_AI Studio{% endblock %}</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { primary: '#007bff' }
+        }
+      }
+    };
+  </script>
+
+  <!-- Theme detection -->
+  <script>
+    if (
+      localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    }
+  </script>
+
+  <style>
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+  </style>
+
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body class="bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+  <div class="flex justify-between items-center px-4 py-2">
+    <!-- Left Section: Sidebar + Title + Workspace -->
+    <div class="flex items-center gap-4">
+      <!-- Sidebar Toggle -->
+      <button onclick="toggleSidebar()" title="Toggle Sidebar" aria-label="Toggle Sidebar"
+        class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded">
+        ☰
+      </button>
+
+      <!-- Title -->
+      <span class="text-xl font-semibold text-gray-900 dark:text-white">
+        KUCHU_AI Studio
+      </span>
+
+      <!-- Workspace Switcher -->
+      <select title="Switch Workspace"
+        class="bg-gray-100 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded shadow">
+        <option>Default Workspace</option>
+        <option>Project 1</option>
+        <option>Project 2</option>
+      </select>
+    </div>
+
+    <!-- Right Section: Theme Toggle + Import/Export -->
+    <div class="flex items-center gap-3">
+      <!-- Context Import/Export -->
+      <div class="flex items-center gap-2">
+        <!-- Export Context -->
+         <a href="/tools/context_manager/context/export" download>
+            ⬇️ Export Context
+          </a>
+
+        <!-- Import Context -->
+         <form method="POST" action="/tools/context_manager/context/import" enctype="multipart/form-data">
+          <label class="cursor-pointer text-sm bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-600">
+            ⬆️ Import Context
+          <input type="file" name="file" accept=".json" onchange="this.form.submit()" class="hidden">
+        </label>
+      </form>
+      </div>
+      <!-- Theme Toggle -->
+      <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
+        class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded shadow">
+        🌓
+      </button>
+    </div>
+  </div>
+
+  <!-- Section Tabs -->
+  <nav class="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+    <div class="px-4 py-1 flex gap-4 text-sm">
+      <a href="/chat" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">💬 Chat</a>
+      <a href="/tools" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">🛠 Tools</a>
+      <a href="/logs" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">📁 Logs</a>
+      <a href="/settings" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">⚙️ Settings</a>
+    </div>
+  </nav>
+</header>
+
+  <!-- Main Layout -->
+  <div class="flex flex-1 pt-28 overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="transition-all duration-300 ease-in-out w-64 bg-muted border-r h-screen overflow-y-auto fixed md:relative z-50">
+        <div class="p-4 space-y-2">
+            <a href="/" class="block mt-2 hover:text-primary">🏠 Dashboard </a>
+            <a href="/projects" class="block mt-2 hover:text-primary">🧪 Projects</a>
+            <a href="/settings" class="block mt-2 hover:text-primary">⚙️ Settings</a>
+        <details class="group mt-4" open>
+            <summary class="cursor-pointer hover:text-primary">💬 Chat</summary>
+            <div class="ml-4 mt-1 space-y-1">
+                {% if conversations %}
+        <details class="group mt-2">
+            <summary class="cursor-pointer hover:text-primary">📂 Sessions</summary>
+            <div class="ml-4 mt-1 space-y-1">
+                {% for cname in conversations.keys() %}
+                <a href="/chat/{{ agent }}?conversation_name={{ cname }}" class="block hover:text-primary">
+                  📝 {{ cname }}
+                </a>
+                {% endfor %}
+            </div>
+            </details>
+            {% else %}
+            <span class="ml-4 text-muted-foreground text-sm">No sessions</span>
+            {% endif %}
+        </div>
+    </details>
+    
+    <details class="group mt-4">
+      <summary class="cursor-pointer hover:text-primary">🧪 Explore Models</summary>
+      <div class="ml-4 mt-1 space-y-1">
+        {% for model_name in models.keys() %}
+          <a href="/chat/{{ model_name }}" class="block hover:text-primary">{{ model_name }}</a>
+        {% endfor %}
+        </div>
+        </details>
+        </div>
+    </aside>
+
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 overflow-y-auto px-4 py-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar.classList.contains('translate-x-0')) {
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('-translate-x-full');
+      } else {
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("imported") === "true") {
+    alert("✅ Context imported successfully!");
+  }
+  </script>
+
+  {% block script_extra %}{% endblock %}
+</body>
+</html>
