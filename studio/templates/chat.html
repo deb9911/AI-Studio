@@ -2,7 +2,7 @@
 {% block title %}{{ agent | capitalize }} Chat{% endblock %}
 
 {% block content %}
-<div id="mainContent" class="ml-64 transition-all duration-200">
+<div id="mainContent" class="ml-64 transition-all duration-200 mr-16">
   <!-- Chat Display Loop -->
   {% for entry in conversation %}
   <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
@@ -15,7 +15,7 @@
 </div>
 
 <!-- Chat Form -->
-<form method="post" class="fixed bottom-0 left-64 right-0 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200" id="chatForm">
+<form method="post" class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200" id="chatForm">
   {% if not conversation_name %}
   <input type="text" name="conversation_name" placeholder="Name this conversation..." required
          class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
@@ -27,6 +27,30 @@
   <button type="submit"
           class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">➤</button>
 </form>
+
+<!-- Right Sidebar -->
+<div id="rightSidebar" class="fixed top-0 right-0 h-full w-64 bg-white dark:bg-gray-900 shadow-lg border-l border-gray-300 dark:border-gray-700 p-4 flex flex-col gap-4 transition-all duration-300 z-40">
+  <button id="toggleRightSidebarBtn" class="absolute left-[-32px] top-1/2 transform -translate-y-1/2 bg-gray-700 text-white rounded-l px-2 py-1 text-sm hover:bg-gray-800 z-50">
+    «
+  </button>
+
+  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Tools</h2>
+  <!--button onclick="handleExport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export</button>
+  <button onclick="document.getElementById('fileInput').click()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Import</button-->
+  <button type="button"
+        onclick="document.getElementById('importFile').click()"
+        class="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded shadow">
+        📥
+  </button>
+  <input type="file" id="importFile" name="import_file" accept=".json" style="display: none;" onchange="this.form.submit()" />
+  <button type="submit"
+        name="export"
+        value="1"
+        class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded shadow">
+        📤
+  </button>
+  <input type="file" id="fileInput" accept=".json" hidden onchange="handleImport(event)">
+</div>
 {% endblock %}
 
 {% block script_extra %}
@@ -46,23 +70,54 @@
       });
     }
 
-    // Sidebar Toggle Logic
+    // Sidebar Toggle Logic (Left)
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebarBtn');
     const mainContent = document.getElementById('mainContent');
     const chatForm = document.getElementById('chatForm');
 
     toggleBtn.addEventListener('click', () => {
-      if (sidebar.classList.contains('translate-x-[-100%]')) {
-        sidebar.classList.remove('translate-x-[-100%]');
-        mainContent.classList.add('ml-64');
-        chatForm.classList.add('left-64');
+      const isHidden = sidebar.classList.contains('translate-x-[-100%]');
+      sidebar.classList.toggle('translate-x-[-100%]');
+      mainContent.classList.toggle('ml-64', !isHidden);
+      chatForm.classList.toggle('left-64', !isHidden);
+    });
+
+    // Right Pane Toggle Logic
+    const rightPane = document.getElementById('rightPane');
+    const toggleRightPaneBtn = document.getElementById('toggleRightPaneBtn');
+
+    toggleRightPaneBtn.addEventListener('click', () => {
+      if (rightPane.classList.contains('translate-x-0')) {
+        // Collapse the pane
+        rightPane.classList.remove('translate-x-0');
+        rightPane.classList.add('translate-x-full');
       } else {
-        sidebar.classList.add('translate-x-[-100%]');
-        mainContent.classList.remove('ml-64');
-        chatForm.classList.remove('left-64');
+        // Expand the pane
+        rightPane.classList.remove('translate-x-full');
+        rightPane.classList.add('translate-x-0');
       }
     });
   };
+
+  function handleExport() {
+    alert("Export logic goes here!");
+  }
+
+  function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        alert("Imported JSON:\n" + JSON.stringify(json, null, 2));
+      } catch (err) {
+        alert("Invalid JSON file");
+      }
+    };
+    reader.readAsText(file);
+  }
 </script>
 {% endblock %}

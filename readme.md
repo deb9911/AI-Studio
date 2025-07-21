@@ -29,8 +29,6 @@ A lightweight FastAPI-powered application that brings multiple LLMs (Groq, Toget
 │ │ ├── index.html
 │ │ └── chat.html
 │ ├── static/ # CSS & background
-│ │ ├── style.css
-│ │ └── background.jpg
 ├── .env # API keys
 ├── requirements.txt
 └── README.md```
@@ -92,3 +90,17 @@ uvicorn studio.main:app --port 8030 --reload
 * Tailwind adopted. 
 * Multiple sideload has added. 
 * Modularize & saperating different sub features as a microservice so application load time will be reduced. 
+
+
+## Import-Export context file for context management. 
+
+### This is for import [When user wants to load any specific context from file system]
+
+`curl -X POST http://localhost:8030/tools/context_manager/context/import \  -F "file=@context1.json"`
+
+### This is for export [When user wants to save any specific context from on-going communication]
+
+`curl -X GET http://localhost:8030/tools/context_manager/context/export --output downloaded_context.json`
+
+
+
