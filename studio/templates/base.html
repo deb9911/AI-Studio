@@ -69,17 +69,10 @@
       <!-- Context Import/Export -->
       <div class="flex items-center gap-2">
         <!-- Export Context -->
-         <a href="/tools/context_manager/context/export" download>
-            ⬇️ Export Context
-          </a>
 
         <!-- Import Context -->
          <form method="POST" action="/tools/context_manager/context/import" enctype="multipart/form-data">
-          <label class="cursor-pointer text-sm bg-gray-300 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-600">
-            ⬆️ Import Context
-          <input type="file" name="file" accept=".json" onchange="this.form.submit()" class="hidden">
-        </label>
-      </form>
+        </form>
       </div>
       <!-- Theme Toggle -->
       <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
@@ -104,7 +97,9 @@
   <div class="flex flex-1 pt-28 overflow-hidden">
     
     <!-- Sidebar -->
-    <aside id="sidebar" class="transition-all duration-300 ease-in-out w-64 bg-muted border-r h-screen overflow-y-auto fixed md:relative z-50">
+    <aside id="sidebar"
+    class="fixed top-28 left-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
+    transition-transform duration-300 -translate-x-full z-30">
         <div class="p-4 space-y-2">
             <a href="/" class="block mt-2 hover:text-primary">🏠 Dashboard </a>
             <a href="/projects" class="block mt-2 hover:text-primary">🧪 Projects</a>
@@ -140,25 +135,45 @@
         </div>
     </aside>
 
-
     <!-- Main Content -->
-    <main id="main-content" class="flex-1 overflow-y-auto px-4 py-6">
+     <main id="main-content"
+     class="flex-1 overflow-y-auto px-4 py-6 transition-all duration-300">
       {% block content %}{% endblock %}
     </main>
   </div>
 
   <!-- Scripts -->
   <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      if (sidebar.classList.contains('translate-x-0')) {
-        sidebar.classList.remove('translate-x-0');
-        sidebar.classList.add('-translate-x-full');
-      } else {
-        sidebar.classList.remove('-translate-x-full');
-        sidebar.classList.add('translate-x-0');
-      }
+    const UI_KEYS = {
+    leftCollapsed: "ui:leftCollapsed",
+    rightCollapsed: "ui:rightCollapsed"
+  };
+  function setFlag(key, val) { localStorage.setItem(key, val ? "1" : "0"); }
+  function getFlag(key, def=false) {
+    const v = localStorage.getItem(key);
+    return v === null ? def : v === "1";
+  }
+    function applyLeftSidebarState() {
+    const collapsed = getFlag(UI_KEYS.leftCollapsed, false);
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('main-content');
+
+    if (collapsed) {
+      sidebar.classList.add('-translate-x-full');
+      main.classList.remove('ml-64');
+    } else {
+      sidebar.classList.remove('-translate-x-full');const url = this.getAttribute("action") || window.location.pathname;
+      main.classList.add('ml-64');
     }
+  }
+
+  function toggleSidebar() {
+    const collapsed = !getFlag(UI_KEYS.leftCollapsed, false);
+    setFlag(UI_KEYS.leftCollapsed, collapsed);
+    applyLeftSidebarState();
+  }
+
+  document.addEventListener('DOMContentLoaded', applyLeftSidebarState);
 
     function toggleTheme() {
       const html = document.documentElement;

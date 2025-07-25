@@ -2,122 +2,219 @@
 {% block title %}{{ agent | capitalize }} Chat{% endblock %}
 
 {% block content %}
-<div id="mainContent" class="ml-64 transition-all duration-200 mr-16">
-  <!-- Chat Display Loop -->
+<!-- MAIN CHAT AREA -->
+ <div id="mainContent" class="ml-64 mr-16 pb-32 transition-all duration-200">
+<!--div id="mainContent" class="ml-64 mr-16 transition-all duration-200"-->
   {% for entry in conversation %}
-  <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
-    <strong>You:</strong><br>{{ entry.user }}
-  </div>
-  <div class="bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
-    <strong>AI:</strong><br>{{ entry.ai }}
-  </div>
-  {% endfor %}
+    <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
+      <strong>You:</strong><br>{{ entry.user }}
+    </div>
+    <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
+      <strong>AI:</strong>
+      <div class="mt-2 whitespace-pre-wrap leading-relaxed">{{ entry.ai | e }}</div>
+    </div>
+    {% endfor %}
 </div>
 
-<!-- Chat Form -->
-<form method="post" class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200" id="chatForm">
+<!-- INPUT FORM -->
+<!--form id="chatForm"
+      method="post"
+      class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200"-->
+<!--form id="chatForm" method="post" action="/chat/{{ agent }}" ...-->
+<form id="chatForm"
+      method="post"
+      action="/chat/{{ agent }}/send"
+      class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200">
   {% if not conversation_name %}
-  <input type="text" name="conversation_name" placeholder="Name this conversation..." required
-         class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+    <input type="text" name="conversation_name" placeholder="Name this conversation..." required
+           class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
   {% else %}
-  <input type="hidden" name="conversation_name" value="{{ conversation_name }}" />
+    <input type="hidden" name="conversation_name" value="{{ conversation_name }}" />
   {% endif %}
+
   <textarea name="user_input" id="user_input" rows="2" placeholder="Send a message..." required
             class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 resize-none"></textarea>
+
   <button type="submit"
           class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">➤</button>
 </form>
 
-<!-- Right Sidebar -->
-<div id="rightSidebar" class="fixed top-0 right-0 h-full w-64 bg-white dark:bg-gray-900 shadow-lg border-l border-gray-300 dark:border-gray-700 p-4 flex flex-col gap-4 transition-all duration-300 z-40">
-  <button id="toggleRightSidebarBtn" class="absolute left-[-32px] top-1/2 transform -translate-y-1/2 bg-gray-700 text-white rounded-l px-2 py-1 text-sm hover:bg-gray-800 z-50">
-    «
+<!-- RIGHT SIDEBAR -->
+<aside id="rightSidebar"
+       class="fixed top-0 right-0 h-full w-64 bg-white dark:bg-gray-900 shadow-lg border-l border-gray-300 dark:border-gray-700 p-4 flex flex-col gap-4 transition-transform duration-300 transform translate-x-0 z-40">
+  <button id="toggleRightSidebarBtn"
+        class="absolute -left-8 top-1/2 -translate-y-1/2 bg-gray-700 text-white rounded-l px-2 py-1 text-sm hover:bg-gray-800">
+      «
   </button>
 
-  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Tools</h2>
-  <!--button onclick="handleExport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export</button>
-  <button onclick="document.getElementById('fileInput').click()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Import</button-->
-  <button type="button"
-        onclick="document.getElementById('importFile').click()"
-        class="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded shadow">
+  <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Tools</h2>
+
+  <div class="flex items-center gap-2">
+    <!-- Import -->
+    <form method="POST" action="/tools/context_manager/context/import" enctype="multipart/form-data">
+      <label class="cursor-pointer px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded shadow">
         📥
-  </button>
-  <input type="file" id="importFile" name="import_file" accept=".json" style="display: none;" onchange="this.form.submit()" />
-  <button type="submit"
-        name="export"
-        value="1"
-        class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded shadow">
-        📤
-  </button>
-  <input type="file" id="fileInput" accept=".json" hidden onchange="handleImport(event)">
-</div>
+        <input type="file" name="file" accept=".json" class="hidden" onchange="this.form.submit()">
+      </label>
+    </form>
+
+    <!-- Export -->
+    <a href="/tools/context_manager/context/export"
+       class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded shadow">
+      📤
+    </a>
+  </div>
+</aside>
+<style>
+  #mainContent {
+    transition: width 0.3s ease;
+    width: calc(100% - 16rem - 16rem); /* 16rem = left sidebar + right sidebar */
+  }
+  #mainContent.right-collapsed {
+    width: calc(100% - 16rem); /* only left sidebar */
+  }
+</style>
 {% endblock %}
 
 {% block script_extra %}
 <script>
-  window.onload = () => {
-    if (localStorage.getItem("theme") === "dark") {
-      document.documentElement.classList.add("dark");
-    }
-
-    const textarea = document.getElementById("user_input");
-    if (textarea) {
-      textarea.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" && !event.shiftKey) {
-          event.preventDefault();
-          this.form.submit();
-        }
-      });
-    }
-
-    // Sidebar Toggle Logic (Left)
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('toggleSidebarBtn');
-    const mainContent = document.getElementById('mainContent');
-    const chatForm = document.getElementById('chatForm');
-
-    toggleBtn.addEventListener('click', () => {
-      const isHidden = sidebar.classList.contains('translate-x-[-100%]');
-      sidebar.classList.toggle('translate-x-[-100%]');
-      mainContent.classList.toggle('ml-64', !isHidden);
-      chatForm.classList.toggle('left-64', !isHidden);
-    });
-
-    // Right Pane Toggle Logic
-    const rightPane = document.getElementById('rightPane');
-    const toggleRightPaneBtn = document.getElementById('toggleRightPaneBtn');
-
-    toggleRightPaneBtn.addEventListener('click', () => {
-      if (rightPane.classList.contains('translate-x-0')) {
-        // Collapse the pane
-        rightPane.classList.remove('translate-x-0');
-        rightPane.classList.add('translate-x-full');
-      } else {
-        // Expand the pane
-        rightPane.classList.remove('translate-x-full');
-        rightPane.classList.add('translate-x-0');
-      }
-    });
-  };
-
-  function handleExport() {
-    alert("Export logic goes here!");
+document.addEventListener("DOMContentLoaded", () => {
+  // ---- THEME ----
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark");
   }
 
-  function handleImport(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+  // ---- DOM HOOKS ----
+  const chatForm   = document.getElementById("chatForm");
+  const userInput  = document.getElementById("user_input");
+  const mainContent= document.getElementById("mainContent");
+  const rightBar   = document.getElementById("rightSidebar");
+  const rightBtn   = document.getElementById("toggleRightSidebarBtn");
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
+  // ---- SMALL LOCAL HELPERS ----
+  const RIGHT_KEY = "ui:rightCollapsed";
+  const getFlag = (k, d=false) => (localStorage.getItem(k) ?? (d ? "1":"0")) === "1";
+  const setFlag = (k, v) => localStorage.setItem(k, v ? "1" : "0");
+
+  // ---- ENTER TO SEND ----
+  if (userInput) {
+    userInput.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        chatForm?.dispatchEvent(new Event("submit", { cancelable: true }));
+      }
+    });
+  }
+
+  // ---- AJAX SUBMIT ----
+  if (chatForm) {
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(chatForm);
+      const url = chatForm.getAttribute("action")
+        || (window.location.pathname.endsWith("/send")
+            ? window.location.pathname
+            : `${window.location.pathname}/send`);
+
       try {
-        const json = JSON.parse(e.target.result);
-        alert("Imported JSON:\n" + JSON.stringify(json, null, 2));
+        const res  = await fetch(url, { method: "POST", body: formData });
+        const data = await res.json();
+
+        appendMessage(data);
+        formatTripleBackticks();
+        mainContent.scrollTop = mainContent.scrollHeight;
+        userInput.value = "";
+        const convInput = chatForm.querySelector('input[name="conversation_name"]');
+        if (convInput && convInput.type === 'text') {
+          const convName = convInput.value.trim();
+          if (convName) {
+            const hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.name = 'conversation_name';
+            hiddenField.value = convName;
+            convInput.replaceWith(hiddenField);
+          }
+        }
       } catch (err) {
-        alert("Invalid JSON file");
+        console.error(err);
       }
-    };
-    reader.readAsText(file);
+    });
   }
+
+  function appendMessage({ user, ai }) {
+    const html = `
+      <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
+        <strong>You:</strong><br>${escapeHtml(user)}
+      </div>
+      <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
+        <strong>AI:</strong>
+        <div class="mt-2 whitespace-pre-wrap leading-relaxed">${escapeHtml(ai)}</div>
+      </div>`;
+    mainContent.insertAdjacentHTML("beforeend", html);
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ---- CODE FENCE (```...```) FORMATTER ----
+  function formatTripleBackticks() {
+    const blocks = document.querySelectorAll(".ai-msg > div");
+    const fence  = /```(\w+)?\n([\s\S]*?)```/g;
+
+    blocks.forEach(node => {
+      const original = node.textContent;
+      if (!original.includes("```")) return;
+
+      let last = 0, html = "", m;
+      while ((m = fence.exec(original)) !== null) {
+        html += escapeHtml(original.slice(last, m.index)).replace(/\n/g, "<br/>");
+        html += `
+          <pre class="bg-gray-900 text-gray-100 text-sm p-3 rounded-lg my-3 overflow-x-auto">
+            <code class="block">${escapeHtml(m[2])}</code>
+          </pre>`;
+        last = fence.lastIndex;
+      }
+      html += escapeHtml(original.slice(last)).replace(/\n/g, "<br/>");
+      node.innerHTML = html;
+    });
+  }
+
+  // ---- RIGHT SIDEBAR TOGGLE + PERSIST ----
+  function applyRightState() {
+    const collapsed = getFlag(RIGHT_KEY, false);
+    if (collapsed) {
+      rightBar.classList.add("translate-x-full");
+      chatForm.classList.replace("right-16", "right-0");
+      mainContent.classList.add("right-collapsed");
+      rightBtn.textContent = "»";
+    } else {
+      rightBar.classList.remove("translate-x-full");
+      chatForm.classList.replace("right-0", "right-16");
+      mainContent.classList.remove("right-collapsed");
+      rightBtn.textContent = "«";
+    }
+  }
+
+  if (rightBtn) {
+    rightBtn.addEventListener("click", () => {
+      setFlag(RIGHT_KEY, !getFlag(RIGHT_KEY, false));
+      applyRightState();
+    });
+  }
+  applyRightState();
+
+  // ---- KEEP SPACE FOR FIXED INPUT ----
+  function adjustBottomPadding() {
+    const h = chatForm ? chatForm.offsetHeight + 24 : 24;
+    mainContent.style.paddingBottom = `${h}px`;
+  }
+  adjustBottomPadding();
+  window.addEventListener("resize", adjustBottomPadding);
+
+  // initial formatting for already-rendered messages
+  formatTripleBackticks();
+});
 </script>
 {% endblock %}
