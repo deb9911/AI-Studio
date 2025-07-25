@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -11,6 +11,7 @@ import uuid
 import os
 from typing import Dict, List
 from pathlib import Path
+from fastapi.responses import JSONResponse
 
 
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
@@ -18,15 +19,25 @@ from tools.context_manager.context_management_routes import router as context_ro
 from tools.RAG.rag_routes import router as rag_router
 from tools.MARKDOWN.md_routes import router as md_router
 from tools.DOCGEN.docgen_routes import router as docgen_router
-
+from studio.dependency import get_current_user
+from studio.routes import auth_routes, config_routes, chat_routes
+from studio.services.config_manager import load_user_config_db, get_user_config
+from studio.services.db import init_db
 
 app = FastAPI()
 
 app.add_middleware(SessionMiddleware, secret_key="Shivaa@2025")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
-# app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+
+init_db()
+
+# Include routers
+app.include_router(auth_routes.router, prefix="/auth", tags=["Authentication"])
+app.include_router(config_routes.router, prefix="/config", tags=["Configuration"])
+app.include_router(chat_routes.router, prefix="/chat", tags=["Chat"])
+
+# Configuration update
 app.include_router(context_router, prefix="/tools/context_manager")
 app.include_router(rag_router, prefix="/tools/rag")
 app.include_router(md_router, prefix="/tools/markdown")
@@ -55,7 +66,16 @@ async def home(request: Request):
         "request": request,
         "models": MODEL_REGISTRY
     })
-    # return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/me/config")
+def get_config(user = Depends(get_current_user)):
+    return load_user_config_db(user["id"])
+
+@app.put("/me/config")
+def update_config(body: dict, user = Depends(get_current_user)):
+    save_user_config_db(user["id"], body)
+    return {"ok": True}
+
 
 
 @app.get("/chat/{model_id}", response_class=HTMLResponse)
@@ -74,9 +94,22 @@ async def get_chat_view(request: Request, model_id: str, conversation_name: str 
     })
 
 
-@app.post("/chat/{model_id}", response_class=HTMLResponse)
-async def post_chat_view(
-    request: Request,
+# @app.get("/chat/{model_id}", response_class=HTMLResponse)
+# async def chat_view(request: Request, model_id: str, conversation_name: str = ""):
+#     conversation = conversations_store.get(conversation_name, [])
+#     return templates.TemplateResponse("chat.html", {
+#         "request": request,
+#         "agent": model_id,
+#         "conversation_name": conversation_name,
+#         "conversation": conversation,
+#         "conversations": conversations_store,
+#         "models": MODEL_REGISTRY
+#     })
+
+
+
+@app.post("/chat/{model_id}/send")
+async def post_chat_message(
     model_id: str,
     user_input: str = Form(...),
     conversation_name: str = Form(...)
@@ -84,26 +117,17 @@ async def post_chat_view(
     handler = get_model_handler(model_id)
     ai_response = handler(user_input)
 
-    # Store conversation history
+    # Store conversation
     if conversation_name not in conversations_store:
         conversations_store[conversation_name] = []
-
     conversations_store[conversation_name].append({
         "user": user_input,
         "ai": ai_response
     })
 
-    conversation = conversations_store[conversation_name]
-
-    return templates.TemplateResponse("chat.html", {
-        "request": request,
-        "agent": model_id,
-        "user_input": user_input,
-        "response": ai_response,
-        "conversation_name": conversation_name,
-        "conversation": conversation,
-        "conversations": conversations_store,
-        "models": MODEL_REGISTRY
+    return JSONResponse({
+        "user": user_input,
+        "ai": ai_response
     })
 
 
