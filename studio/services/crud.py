@@ -2,13 +2,15 @@ from sqlmodel import select, Session
 from passlib.hash import bcrypt
 from studio.services.models import User, UserConfig
 
+from studio.services.models import User, UserConfig
+from studio.services.security import hash_password, verify_password
+
 def create_user(session: Session, email: str, password: str, role: str = "user") -> User:
-    hashed = bcrypt.hash(password)
+    hashed = hash_password(password)
     user = User(email=email, password_hash=hashed, role=role)
     session.add(user)
     session.commit()
     session.refresh(user)
-    # also create empty config
     cfg = UserConfig(user_id=user.id, data={})
     session.add(cfg)
     session.commit()
@@ -16,9 +18,7 @@ def create_user(session: Session, email: str, password: str, role: str = "user")
 
 def authenticate_user(session: Session, email: str, password: str) -> User | None:
     user = session.exec(select(User).where(User.email == email)).first()
-    if not user:
-        return None
-    if not bcrypt.verify(password, user.password_hash):
+    if not user or not verify_password(password, user.password_hash):
         return None
     return user
 

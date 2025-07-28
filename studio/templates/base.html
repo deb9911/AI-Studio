@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="favicon.ico" />
   <title>{% block title %}KUCHU_AI Studio{% endblock %}</title>
 
   <!-- Tailwind CSS -->
@@ -69,14 +70,25 @@
       <!-- Context Import/Export -->
       <div class="flex items-center gap-2">
         <!-- Export Context -->
-
         <!-- Import Context -->
-         <form method="POST" action="/tools/context_manager/context/import" enctype="multipart/form-data">
+        <form method="POST" action="/tools/context_manager/context/import" enctype="multipart/form-data">
         </form>
       </div>
+
+      <!-- Auth Links or Logout -->
+      {% if request.session.get('user_id') %}
+        <span class="text-sm opacity-70">Signed in</span>
+        <form action="/auth/logout" method="post" class="inline">
+          <button class="px-3 py-1 rounded bg-red-500 text-white text-sm">Logout</button>
+        </form>
+      {% else %}
+        <a href="/auth/login" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Login</a>
+        <a href="/auth/register" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Register</a>
+      {% endif %}
+
       <!-- Theme Toggle -->
       <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
-        class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded shadow">
+              class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded shadow">
         🌓
       </button>
     </div>

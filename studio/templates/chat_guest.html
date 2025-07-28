@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Guest Chat{% endblock %}
+
+{% block content %}
+<div id="mainContent" class="ml-64 pb-32 transition-all duration-200">
+  <div id="messages"></div>
+</div>
+
+<form id="guestChatForm"
+      class="fixed bottom-0 left-64 right-0 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50"
+      method="post"
+      action="/chat/{{ DEFAULT_MODEL_ID }}/send">
+  <input type="hidden" name="conversation_name" value="guest" />
+  <input type="text" id="guest_message" name="user_input" placeholder="Type your message..." required
+         class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+  <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">➤</button>
+</form>
+
+<div class="ml-64 mt-4 text-sm text-gray-500">
+  <p>You’re chatting as a guest. <a href="/auth/login" class="text-blue-500 underline">Login</a> to save history & use more features.</p>
+</div>
+{% endblock %}
+
+{% block script_extra %}
+<script>
+  const messagesDiv = document.getElementById('messages');
+  const form = document.getElementById('guestChatForm');
+  const input = document.getElementById('guest_message');
+  const mainContent = document.getElementById('mainContent');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user = input.value.trim();
+    if (!user) return;
+
+    appendBubble('You', user, 'blue');
+    input.value = '';
+
+    const formData = new FormData(form);
+    const url = form.getAttribute("action")
+      || (window.location.pathname.endsWith("/send")
+          ? window.location.pathname
+          : `${window.location.pathname}/send`);
+
+    try {
+      const res  = await fetch(url, { method: "POST", body: formData });
+      const data = await res.json();
+
+      // FIX: assume backend returns { response: "..." }
+      appendMessage({ user: data.user, ai: data.ai || "❌ No response received from model." }); 
+      formatTripleBackticks();
+      mainContent.scrollTop = mainContent.scrollHeight;
+    } catch (err) {
+      console.error(err);
+      appendMessage({ user, ai: "❌ Error contacting model." });
+    }
+  });
+
+  function appendBubble(who, text, color) {
+    messagesDiv.insertAdjacentHTML('beforeend', `
+      <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-${color}-500">
+        <strong>${who}:</strong><br>${escapeHtml(text)}
+      </div>
+    `);
+  }
+
+  function appendMessage({ user, ai }) {
+    const html = `
+      <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
+        <strong>You:</strong><br>${escapeHtml(user)}
+      </div>
+      <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
+        <strong>AI:</strong>
+        <div class="mt-2 whitespace-pre-wrap leading-relaxed">${escapeHtml(ai)}</div>
+      </div>`;
+    mainContent.insertAdjacentHTML("beforeend", html);
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ---- CODE FENCE (```...```) FORMATTER ----
+  function formatTripleBackticks() {
+    const blocks = document.querySelectorAll(".ai-msg > div");
+    const fence  = /```(\w+)?\n([\s\S]*?)```/g;
+
+    blocks.forEach(node => {
+      const original = node.textContent;
+      if (!original.includes("```")) return;
+
+      let last = 0, html = "", m;
+      while ((m = fence.exec(original)) !== null) {
+        html += escapeHtml(original.slice(last, m.index)).replace(/\n/g, "<br/>");
+        html += `
+          <pre class="bg-gray-900 text-gray-100 text-sm p-3 rounded-lg my-3 overflow-x-auto">
+            <code class="block">${escapeHtml(m[2])}</code>
+          </pre>`;
+        last = fence.lastIndex;
+      }
+      html += escapeHtml(original.slice(last)).replace(/\n/g, "<br/>");
+      node.innerHTML = html;
+    });
+  }
+
+  // ---- RIGHT SIDEBAR TOGGLE + PERSIST ----
+  function applyRightState() {
+    const collapsed = getFlag(RIGHT_KEY, false);
+    if (collapsed) {
+      rightBar.classList.add("translate-x-full");
+      chatForm.classList.replace("right-16", "right-0");
+      mainContent.classList.add("right-collapsed");
+      rightBtn.textContent = "»";
+    } else {
+      rightBar.classList.remove("translate-x-full");
+      chatForm.classList.replace("right-0", "right-16");
+      mainContent.classList.remove("right-collapsed");
+      rightBtn.textContent = "«";
+    }
+  }
+  if (rightBtn) {
+    rightBtn.addEventListener("click", () => {
+      setFlag(RIGHT_KEY, !getFlag(RIGHT_KEY, false));
+      applyRightState();
+    });
+  }
+  applyRightState();
+
+  // ---- KEEP SPACE FOR FIXED INPUT ----
+  function adjustBottomPadding() {
+    const h = chatForm ? chatForm.offsetHeight + 24 : 24;
+    mainContent.style.paddingBottom = `${h}px`;
+  }
+  adjustBottomPadding();
+  window.addEventListener("resize", adjustBottomPadding);
+
+  // initial formatting for already-rendered messages
+  formatTripleBackticks();
+});
+</script>
+{% endblock %}

@@ -65,6 +65,11 @@ GROQ_API_KEY=your_groq_key_here
 TOGETHER_API_KEY=your_together_key_here
 ```
 
+### Set Project path in Pythonpath before executing the main script
+set PYTHONPATH=%cd%
+export PYTHONPATH=/home/ubuntu/AI-Studio  # adjust as per your path
+
+
 ## 🧪 Run the App
 ```
 uvicorn studio.main:app --port 8030 --reload
@@ -101,6 +106,4 @@ uvicorn studio.main:app --port 8030 --reload
 ### This is for export [When user wants to save any specific context from on-going communication]
 
 `curl -X GET http://localhost:8030/tools/context_manager/context/export --output downloaded_context.json`
-
-
 
