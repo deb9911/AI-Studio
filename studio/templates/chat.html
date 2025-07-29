@@ -2,6 +2,31 @@
 {% block title %}{{ agent | capitalize }} Chat{% endblock %}
 
 {% block content %}
+{% if not request.session.get('user_id') %}
+  <div class="flex flex-col items-center justify-center text-center p-10">
+    <h2 class="text-xl font-semibold mb-2">Welcome to KUCHU_AI Studio</h2>
+    <p class="mb-4">You are in guest mode. Login or register to save your chats.</p>
+    <div class="space-x-4">
+      <a href="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Login</a>
+      <a href="/auth/register" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded hover:bg-gray-400">Register</a>
+    </div>
+  </div>
+{% else %}
+  <!-- Your existing chat content -->
+  <div id="mainContent" class="ml-64 mr-16 pb-32 transition-all duration-200">
+    {% for entry in conversation %}
+      <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
+        <strong>You:</strong><br>{{ entry.user }}
+      </div>
+      <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
+        <strong>AI:</strong>
+        <div class="mt-2 whitespace-pre-wrap leading-relaxed">{{ entry.ai | e }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  <!-- Input Form + Right Sidebar -->
+  {{ super() }}
+{% endif %}
 <!-- MAIN CHAT AREA -->
  <div id="mainContent" class="ml-64 mr-16 pb-32 transition-all duration-200">
 <!--div id="mainContent" class="ml-64 mr-16 transition-all duration-200"-->
