@@ -6,12 +6,21 @@ router = APIRouter()
 templates = Jinja2Templates(directory="studio/templates")
 
 # ---------- Home Page ----------
+# @router.get("/", response_class=HTMLResponse)
+# def home(request: Request):
+#     # If user is logged in, redirect to /chat
+#     if request.session.get("user_id"):
+#         return RedirectResponse(url="/chat", status_code=302)
+#     return templates.TemplateResponse("home.html", {"request": request})
+
 @router.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    # If user is logged in, redirect to /chat
-    if request.session.get("user_id"):
-        return RedirectResponse(url="/chat", status_code=302)
-    return templates.TemplateResponse("home.html", {"request": request})
+async def home(request: Request):
+    return templates.TemplateResponse("base.html", {
+        "request": request,
+        "models": {"gpt-4": "GPT-4", "gemini": "Gemini"},
+        "conversations": {"Demo Chat": {}, "Meeting Notes": {}},
+        "agent": "gpt-4"
+    })
 
 # ---------- Chat Page ----------
 @router.get("/chat", response_class=HTMLResponse)
@@ -37,3 +46,5 @@ def profile_page(request: Request):
         "user_id": user_id,
         "role": request.session.get("role")
     })
+
+
