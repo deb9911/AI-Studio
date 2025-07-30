@@ -76,19 +76,25 @@ uvicorn studio.main:app --port 8030 --reload
 ```
 ## Application Updates
 ### Dashboard
-![alt text](image.png)
+<img width="1855" height="871" alt="image" src="https://github.com/user-attachments/assets/765c54e2-ad75-49e6-85ab-549d415ddc15" />
+
 
 ### Dashboard with toggle
-![alt text](image-1.png)
+<img width="1857" height="883" alt="image" src="https://github.com/user-attachments/assets/373fe6c0-6b20-4919-9a01-05e4e1e2961a" />
+
 
 ### Conversation - Context management 
-![alt text](image-2.png) 
+<img width="1857" height="881" alt="image" src="https://github.com/user-attachments/assets/4c1506bc-faec-48e8-8588-be0e2deb61fb" />
+<img width="1848" height="882" alt="image" src="https://github.com/user-attachments/assets/25a941fc-d28e-49ff-af75-0d8b7bc2794a" />
+
 
 ### Application utilities & customize experience for a better accessability. 
-![alt text](image-3.png)
+<img width="1857" height="892" alt="image" src="https://github.com/user-attachments/assets/45f4bbed-ceb5-48d1-8478-a4718c5c8246" />
+
 
 #### For a better experience, application is build in a light weight manner. 
-![alt text](image-4.png)
+<img width="1860" height="887" alt="image" src="https://github.com/user-attachments/assets/161d27c9-1d27-446a-90cb-8b51cc6320a9" />
+
 
 ## Tailwind integration for Studio app beautification. 
 
