@@ -35,6 +35,8 @@ app.add_middleware(SessionMiddleware, secret_key="Shivaa@2025")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 app.mount("/static", StaticFiles(directory="studio/static"), name="static")
+templates.env.cache.clear()
+
 
 init_db()
 

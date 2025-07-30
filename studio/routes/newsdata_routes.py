@@ -9,6 +9,7 @@ templates = Jinja2Templates(directory="studio/templates")
 
 @router.get("/api/news")
 def get_news():
+    # Add switcher for change region so user can change location to get associated info in dashboard.  
     rss_url = "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
     feed = feedparser.parse(rss_url)
 
