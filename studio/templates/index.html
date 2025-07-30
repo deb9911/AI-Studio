@@ -1,63 +1,163 @@
 {% extends "base.html" %}
 
-{% block title %}Home - My App{% endblock %}
-
 {% block content %}
-<!-- Theme Toggle -->
-    <!--button onclick="toggleTheme()" class="fixed top-3 right-4 z-50 px-3 py-1 border-2 border-primary text-primary rounded-full bg-white dark:bg-gray-800">
-        🌓
-    </button-->
+<div class="p-6 space-y-4">
 
-    <!-- Dashboard Container -->
-    <div class="max-w-6xl mx-auto py-16 px-6">
-        <h1 class="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">🧠 Welcome to AI Studio</h1>
-        <p class="mb-10 text-gray-600 dark:text-gray-300">Select a model or service to get started.</p>
+  <!-- Model Selection Block -->
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Available Models</h2>
+    <div class="flex flex-wrap gap-2">
+      {% for model_name in models.keys() %}
+        <a href="/chat/{{ model_name }}" class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition">
+          {{ model_name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for model_id, model in models.items() %}
-            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6 transition-transform hover:-translate-y-1 hover:shadow-lg">
-                <h2 class="text-xl font-semibold text-primary mb-2">{{ model.label }}</h2>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                    {% if model.description %}
-                        {{ model.description }}
-                    {% else %}
-                        A powerful AI model accessible via API.
-                    {% endif %}
-                </p>
-                <a href="/chat/{{ model_id }}" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Chat Now →</a>
-            </div>
-            {% endfor %}
+  <!-- Vertical stacked dashboard cards -->
+  <div class="space-y-6">
 
-            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6 opacity-60 cursor-not-allowed">
-                <h2 class="text-xl font-semibold text-gray-400 mb-2">🎨 Image Generator</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Generate visuals with text prompts. Coming soon.</p>
-                <a href="#" class="text-gray-400">Coming Soon</a>
-            </div>
+  <!-- Updated Recent Affairs Section -->
+  <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Recent Affairs (via NYTimes)</h2>
+    <div id="news-scroll" class="flex gap-4 overflow-x-auto pb-2">
+        <!-- News cards will load here -->
+    </div>
+   </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
-                <h2 class="text-xl font-semibold text-primary mb-2">📊 Your Usage</h2>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Metering up user's usage details.</p>
-                <a href="#" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Review →</a>
-            </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
-                <h2 class="text-xl font-semibold text-primary mb-2">🚀 Recommended Models</h2>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">As per your interest, here’s a hub-space to explore more Agents.</p>
-                <a href="#" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Explore →</a>
-            </div>
+  <!-- Usage Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    <!-- Monthly Usage Pie -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow p-4">
+        <h3 class="text-md font-semibold text-center text-gray-800 dark:text-gray-100 mb-2">Monthly Token Usage</h3>
+        <div class="flex justify-center">
+        <canvas id="monthlyChart" class="w-40 h-40"></canvas>
         </div>
     </div>
 
-    <script>
-        function toggleTheme() {
-            document.documentElement.classList.toggle("dark");
-            localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
+    <!-- Daily Usage Pie -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow p-4">
+        <h3 class="text-md font-semibold text-center text-gray-800 dark:text-gray-100 mb-2">Daily Token Usage</h3>
+        <div class="flex justify-center">
+        <canvas id="dailyChart" class="w-40 h-40"></canvas>
+        </div>
+    </div>
+
+    <!-- Weekly Usage Bar -->
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow p-4">
+        <h3 class="text-md font-semibold text-center text-gray-800 dark:text-gray-100 mb-2">Weekly Token Usage</h3>
+        <div class="flex justify-center">
+        <canvas id="weeklyChart" class="w-full h-40"></canvas>
+        </div>
+    </div>
+
+    </div>
+
+  <!-- Chat List Section -->
+  <div class="w-full bg-white dark:bg-gray-900 rounded-xl shadow p-4">
+    <h3 class="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">Chat History</h3>
+    <ul class="space-y-2 text-sm">
+      <li><a href="#" class="text-blue-600 hover:underline dark:text-blue-400">Session: 27th July - Gemini Pro</a></li>
+      <li><a href="#" class="text-blue-600 hover:underline dark:text-blue-400">Session: 26th July - Claude</a></li>
+    </ul>
+  </div>
+ </div>
+
+
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadNews() {
+    const res = await fetch('/api/news');
+    const data = await res.json();
+
+    const container = document.getElementById('news-scroll');
+    container.innerHTML = '';
+    //container.innerHTML = '<div class="text-gray-500 text-sm">Loading news...</div>';
+
+    data.news.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'min-w-[300px] max-w-sm bg-white dark:bg-gray-900 rounded-xl shadow p-4 flex-shrink-0';
+
+        if (item.image) {
+            const img = document.createElement('img');
+            img.src = item.image;
+            img.alt = item.title;
+            img.className = 'w-full h-40 object-cover rounded-md mb-3';
+            card.appendChild(img);
         }
 
-        window.onload = () => {
-            if (localStorage.getItem("theme") === "dark") {
-                document.documentElement.classList.add("dark");
-            }
-        };
-    </script>
+        const link = document.createElement('a');
+        link.href = item.link;
+        link.target = '_blank';
+        link.className = 'text-blue-600 hover:underline dark:text-blue-400 text-sm font-medium';
+        link.textContent = item.title;
+
+        const date = document.createElement('div');
+        date.className = 'text-xs text-gray-500 mt-2';
+        date.textContent = new Date(item.published).toLocaleDateString();
+
+        card.appendChild(link);
+        card.appendChild(date);
+        container.appendChild(card);
+    });
+    }
+    loadNews();
+
+  // Monthly Usage Pie
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Used', 'Remaining'],
+      datasets: [{
+        data: [42000, 8000],  // Example values
+        backgroundColor: ['#60A5FA', '#E5E7EB'],
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+    }
+  });
+
+  // Daily Usage Pie
+  new Chart(document.getElementById('dailyChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Used', 'Remaining'],
+      datasets: [{
+        data: [5200, 2800],  // Example values
+        backgroundColor: ['#34D399', '#E5E7EB'],
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+    }
+  });
+
+  // Weekly Bar Chart
+  new Chart(document.getElementById('weeklyChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'Tokens Used',
+        data: [6000, 7000, 5000, 8000, 3000, 4000, 7500],
+        backgroundColor: '#FBBF24',
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#6B7280' } },
+        x: { ticks: { color: '#6B7280' } }
+      }
+    }
+  });
+</script>
 {% endblock %}

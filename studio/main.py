@@ -16,7 +16,7 @@ import uvicorn
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
 
 # App components
-from studio.routes import auth_routes, config_routes, chat_routes
+from studio.routes import auth_routes, config_routes, chat_routes, newsdata_routes
 from studio.services.db import init_db, get_session
 from studio.dependency import get_current_user, require_roles
 from studio.services.config_manager import load_user_config_db, save_user_config_db
@@ -39,10 +39,11 @@ app.mount("/static", StaticFiles(directory="studio/static"), name="static")
 init_db()
 
 # Include routers
-app.include_router(auth_routes.router, tags=["Authentication"])
+app.include_router(auth_routes.router, tags=["Authentication"])     # Need special alignment.
 app.include_router(config_routes.router, prefix="/config", tags=["Configuration"])
 # app.include_router(google_router, prefix="/auth", tags=["OAuth"])
-app.include_router(auth_router, prefix="/auth", tags=["OAuth"])
+app.include_router(auth_router, prefix="/auth", tags=["OAuth"])     # Need special alignment.
+app.include_router(newsdata_routes.router, tags=["News"])
 app.include_router(chat_routes.router, prefix="/chat", tags=["Chat"])
 
 # Configuration update
@@ -52,7 +53,6 @@ app.include_router(md_router, prefix="/tools/markdown")
 app.include_router(docgen_router, prefix="/tools/docgen")
     
 conversations_store: Dict[str, List[Dict[str, str]]] = {}  # {conversation_name: [ {"user":..., "ai":...}, ... ]}
-
 
 @app.post("/generate-doc")
 async def generate_doc(request: Request, content: str = Form(...)):
@@ -125,8 +125,6 @@ async def get_chat_view(request: Request, model_id: str, conversation_name: str 
         "conversations": conversations_store,
         "models": MODEL_REGISTRY
     })
-
-
 
 @app.post("/chat/{model_id}/send")
 async def post_chat_message(

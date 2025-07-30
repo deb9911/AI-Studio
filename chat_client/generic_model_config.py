@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
-TOGETHER_API_KEY = os.getenv("together-api")
-TOGETHER_BASE_URL = os.getenv("together-url")
+TOGETHER_API_KEY = os.getenv("TOGETHER_API")
+TOGETHER_BASE_URL = os.getenv("TOGETHER_URL")
 
 print(f'TOGETHER_API_KEY=>\t{TOGETHER_API_KEY}\nTOGETHER_BASE_URL=>\t{TOGETHER_BASE_URL}')
 
