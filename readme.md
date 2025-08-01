@@ -74,6 +74,11 @@ export PYTHONPATH=/home/ubuntu/AI-Studio  # adjust as per your path
 ```
 uvicorn studio.main:app --port 8030 --reload
 ```
+
+### For locally test app from edge devices. 
+uvicorn studio.main:app --host 0.0.0.0 --port 8030 --reload
+
+
 ## Application Updates
 ### Dashboard
 ![alt text](image.png)
