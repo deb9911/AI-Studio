@@ -55,53 +55,44 @@
 
   <!-- Top Navbar -->
   <header class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-    <div class="flex justify-between items-center px-4 py-2">
-      <!-- Left Section -->
-      <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" title="Toggle Sidebar" aria-label="Toggle Sidebar"
-          class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded">☰</button>
-        <span class="text-xl font-semibold">KUCHU-AI Studio</span>
-        <select class="bg-gray-100 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded shadow">
-          <option>Default Workspace</option>
-          <option>Project 1</option>
-          <option>Project 2</option>
-        </select>
-      </div>
+  <div class="flex justify-between items-center px-4 py-2">
+    <!-- Left Section -->
+    <div class="flex items-center gap-4">
+      <button onclick="toggleSidebar()" title="Toggle Sidebar" aria-label="Toggle Sidebar"
+              class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded">☰</button>
+      <span class="text-xl font-semibold whitespace-nowrap">KUCHU-AI Studio</span>
 
-      <!-- Right Section -->
-      <div class="flex items-center gap-3">
-        {% if request.session.get('user_id') %}
-          <span class="text-sm opacity-70">Signed in</span>
-          <form action="/auth/logout" method="post">
-            <button class="px-3 py-1 rounded bg-red-500 text-white text-sm">Logout</button>
-          </form>
-        {% else %}
-          <a href="/auth/login" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Login</a>
-          <a href="/auth/register" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Register</a>
-        {% endif %}
-
-        <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
-                class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded shadow">🌓</button>
-      </div>
+      <select class="bg-gray-100 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded shadow">
+        <option>Default Workspace</option>
+        <option>Project 1</option>
+        <option>Project 2</option>
+      </select>
     </div>
 
-    <!-- Tabs -->
-    <nav class="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-1 flex gap-4 text-sm">
-        <a href="/chat" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">💬 Chat Utilities</a>
-        <a href="/tools" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">🛠 Tools Manager</a>
-        <a href="/logs" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">📁 Logs Manager</a>
-        <a href="/settings" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">⚙️ Settings</a>
-      </div>
-    </nav>
-  </header>
+    <!-- Right Section -->
+    <div class="flex items-center gap-3">
+      {% if request.session.get('user_id') %}
+        <span class="text-sm opacity-70">Signed in</span>
+        <form action="/auth/logout" method="post">
+          <button class="px-3 py-1 rounded bg-red-500 text-white text-sm">Logout</button>
+        </form>
+      {% else %}
+        <a href="/auth/login" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Login</a>
+        <a href="/auth/register" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Register</a>
+      {% endif %}
+
+      <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
+              class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded shadow">🌓</button>
+    </div>
+  </div>
+</header>
 
   <!-- Layout -->
   <div class="flex flex-1 pt-28 overflow-hidden">
   <!-- Full Sidebar -->
   <!-- Expanded Sidebar (unchanged unless you want Chat as direct link instead of dropdown) -->
 <aside id="sidebar"
-  class="fixed top-28 left-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto transition-transform duration-300 z-30">
+  class="fixed top-[56px] left-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto transition-transform duration-300 z-30">
   <div class="p-4 space-y-6 text-sm text-black dark:text-white">
 
     <!-- Direct Links -->
@@ -156,7 +147,7 @@
 
 <!-- Mini Ribbon Sidebar -->
 <aside id="sidebar-ribbon"
-  class="fixed top-28 left-0 bottom-0 w-12 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
+  class="fixed top-[56px] left-0 bottom-0 w-12 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
          transition-transform duration-300 z-30 hidden flex-col items-center py-4 space-y-6 sm:space-y-8 md:space-y-10
          text-gray-600 dark:text-gray-300">
 

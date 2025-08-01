@@ -16,7 +16,7 @@ import uvicorn
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
 
 # App components
-from studio.routes import auth_routes, config_routes, chat_routes, newsdata_routes
+from studio.routes import auth_routes, config_routes, chat_routes, newsdata_routes, project_and_settings_routes
 from studio.services.db import init_db, get_session
 from studio.dependency import get_current_user, require_roles
 from studio.services.config_manager import load_user_config_db, save_user_config_db
@@ -43,9 +43,9 @@ init_db()
 # Include routers
 app.include_router(auth_routes.router, tags=["Authentication"])     # Need special alignment.
 app.include_router(config_routes.router, prefix="/config", tags=["Configuration"])
-# app.include_router(google_router, prefix="/auth", tags=["OAuth"])
 app.include_router(auth_router, prefix="/auth", tags=["OAuth"])     # Need special alignment.
 app.include_router(newsdata_routes.router, tags=["News"])
+app.include_router(project_and_settings_routes.router, tags=["Settings"])
 app.include_router(chat_routes.router, prefix="/chat", tags=["Chat"])
 
 # Configuration update
