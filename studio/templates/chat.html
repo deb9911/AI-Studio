@@ -11,48 +11,67 @@
       <a href="/auth/register" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded hover:bg-gray-400">Register</a>
     </div>
   </div>
-{% else %}
-  <!-- Your existing chat content -->
-  <div id="mainContent" class="ml-64 mr-16 pb-32 transition-all duration-200">
-    {% for entry in conversation %}
-      <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
-        <strong>You:</strong><br>{{ entry.user }}
-      </div>
-      <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
-        <strong>AI:</strong>
-        <div class="mt-2 whitespace-pre-wrap leading-relaxed">{{ entry.ai | e }}</div>
-      </div>
-    {% endfor %}
-  </div>
-  <!-- Input Form + Right Sidebar -->
-  {{ super() }}
 {% endif %}
+
 <!-- MAIN CHAT AREA -->
- <div id="mainContent" class="ml-64 mr-16 pb-32 transition-all duration-200">
-<!--div id="mainContent" class="ml-64 mr-16 transition-all duration-200"-->
-  {% for entry in conversation %}
-    <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
-      <strong>You:</strong><br>{{ entry.user }}
-    </div>
-    <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
-      <strong>AI:</strong>
-      <div class="mt-2 whitespace-pre-wrap leading-relaxed">{{ entry.ai | e }}</div>
-    </div>
+<div id="mainContent" class="ml-64 mr-16 pb-32 transition-all duration-200 overflow-y-auto">
+  {% if conversation %}
+    {% for entry in conversation %}
+      <!-- USER BUBBLE -->
+      <div class="flex items-start gap-3 mb-4">
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">You</div>
+              <div class="text-xs text-gray-500">You</div>
+            </div>
+            <div class="text-xs text-gray-400">{{ entry.ts or '' }}</div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-blue-500">
+            <div class="whitespace-pre-wrap leading-relaxed">{{ entry.user | e }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI BUBBLE -->
+      <div class="flex items-start gap-3 mb-4">
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-medium">AI</div>
+              <div class="text-xs text-gray-500">{{ agent | default('AI') }}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs text-gray-400">{{ entry.ts or '' }}</div>
+              <button class="copy-btn text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-200" data-content="{{ entry.ai | e }}">Copy</button>
+            </div>
+          </div>
+          <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow border-l-4 border-green-500">
+            <div class="mt-2 whitespace-pre-wrap leading-relaxed">{{ entry.ai | e }}</div>
+          </div>
+
+          <!-- quick actions -->
+          <div class="mt-2 flex gap-2 text-sm">
+            <button class="btn-like px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">👍</button>
+            <button class="btn-dislike px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">👎</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">↺ Regenerate</button>
+          </div>
+        </div>
+      </div>
     {% endfor %}
+  {% else %}
+    <div class="text-center text-gray-500 py-12">No messages yet — say hi 👋</div>
+  {% endif %}
 </div>
 
 <!-- INPUT FORM -->
-<!--form id="chatForm"
-      method="post"
-      class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200"-->
-<!--form id="chatForm" method="post" action="/chat/{{ agent }}" ...-->
 <form id="chatForm"
       method="post"
       action="/chat/{{ agent }}/send"
       class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200">
   {% if not conversation_name %}
     <input type="text" name="conversation_name" placeholder="Name this conversation..." required
-           class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+           class="px-4 py-2 flex-0 w-48 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
   {% else %}
     <input type="hidden" name="conversation_name" value="{{ conversation_name }}" />
   {% endif %}
@@ -60,8 +79,11 @@
   <textarea name="user_input" id="user_input" rows="2" placeholder="Send a message..." required
             class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 resize-none"></textarea>
 
-  <button type="submit"
-          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">➤</button>
+  <button id="sendBtn" type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+    <span>➤</span>
+    <span id="sendSpinner" class="hidden animate-spin">⏳</span>
+  </button>
 </form>
 
 <!-- RIGHT SIDEBAR -->
@@ -85,19 +107,13 @@
 
     <!-- Export -->
     <a href="/tools/context_manager/context/export"
-       class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded shadow">
-      📤
-    </a>
+       class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded shadow">📤</a>
   </div>
 </aside>
 <style>
-  #mainContent {
-    transition: width 0.3s ease;
-    width: calc(100% - 16rem - 16rem); /* 16rem = left sidebar + right sidebar */
-  }
-  #mainContent.right-collapsed {
-    width: calc(100% - 16rem); /* only left sidebar */
-  }
+  #mainContent { transition: width 0.3s ease; width: calc(100% - 16rem - 16rem); max-height: calc(100vh - 12rem); overflow-y:auto; padding: 1rem; }
+  #mainContent.right-collapsed { width: calc(100% - 16rem); }
+  .ai-msg pre { white-space: pre-wrap; word-break: break-word; }
 </style>
 {% endblock %}
 
@@ -113,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatForm   = document.getElementById("chatForm");
   const userInput  = document.getElementById("user_input");
   const mainContent= document.getElementById("mainContent");
+  const sendSpinner= document.getElementById("sendSpinner");
   const rightBar   = document.getElementById("rightSidebar");
   const rightBtn   = document.getElementById("toggleRightSidebarBtn");
 
@@ -135,70 +152,116 @@ document.addEventListener("DOMContentLoaded", () => {
   if (chatForm) {
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const userText = (userInput.value || '').trim();
+      if (!userText) return;
+
+      appendUserBubble(userText);
+      userInput.value = '';
+      adjustBottomPadding();
+      scrollToBottom();
+      sendSpinner.classList.remove('hidden');
 
       const formData = new FormData(chatForm);
-      const url = chatForm.getAttribute("action")
-        || (window.location.pathname.endsWith("/send")
-            ? window.location.pathname
-            : `${window.location.pathname}/send`);
+      const url = chatForm.getAttribute("action") || `/chat/{{ agent }}/send`;
 
       try {
-        const res  = await fetch(url, { method: "POST", body: formData });
+        const res = await fetch(url, { method: "POST", body: formData });
         const data = await res.json();
 
-        appendMessage(data);
+        appendAIBubble(data.ai || "❌ No response received from model.");
+        wireCopyButtons();
+        wireActionButtons();
         formatTripleBackticks();
-        mainContent.scrollTop = mainContent.scrollHeight;
-        userInput.value = "";
-        const convInput = chatForm.querySelector('input[name="conversation_name"]');
-        if (convInput && convInput.type === 'text') {
-          const convName = convInput.value.trim();
-          if (convName) {
-            const hiddenField = document.createElement('input');
-            hiddenField.type = 'hidden';
-            hiddenField.name = 'conversation_name';
-            hiddenField.value = convName;
-            convInput.replaceWith(hiddenField);
-          }
-        }
+        scrollToBottom();
       } catch (err) {
         console.error(err);
+        appendAIBubble("❌ Error contacting model.");
+        scrollToBottom();
+      } finally {
+        sendSpinner.classList.add('hidden');
+      }
+
+      const convInput = chatForm.querySelector('input[name="conversation_name"]');
+      if (convInput && convInput.type === 'text') {
+        const convName = convInput.value.trim();
+        if (convName) {
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = 'conversation_name';
+          hiddenField.value = convName;
+          convInput.replaceWith(hiddenField);
+        }
       }
     });
   }
 
-  function appendMessage({ user, ai }) {
+  function appendUserBubble(text) {
+    const ts = new Date().toLocaleTimeString();
     const html = `
-      <div class="bg-white dark:bg-gray-800 p-4 mb-4 rounded-lg shadow border-l-4 border-blue-500">
-        <strong>You:</strong><br>${escapeHtml(user)}
-      </div>
-      <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 mb-4 rounded-lg shadow border-l-4 border-green-500">
-        <strong>AI:</strong>
-        <div class="mt-2 whitespace-pre-wrap leading-relaxed">${escapeHtml(ai)}</div>
+      <div class="flex items-start gap-3 mb-4">
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">You</div>
+              <div class="text-xs text-gray-500">You</div>
+            </div>
+            <div class="text-xs text-gray-400">${ts}</div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-blue-500">
+            <div class="whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</div>
+          </div>
+        </div>
       </div>`;
-    mainContent.insertAdjacentHTML("beforeend", html);
+    mainContent.insertAdjacentHTML('beforeend', html);
+  }
+
+  function appendAIBubble(aiText) {
+    const ts = new Date().toLocaleTimeString();
+    const html = `
+      <div class="flex items-start gap-3 mb-4">
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-medium">AI</div>
+              <div class="text-xs text-gray-500">{{ agent | default('AI') }}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs text-gray-400">${ts}</div>
+              <button class="copy-btn text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-200" data-content="${escapeHtml(aiText)}">Copy</button>
+            </div>
+          </div>
+          <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow border-l-4 border-green-500">
+            <div class="mt-2 whitespace-pre-wrap leading-relaxed">${escapeHtml(aiText)}</div>
+          </div>
+          <div class="mt-2 flex gap-2 text-sm">
+            <button class="btn-like px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">👍</button>
+            <button class="btn-dislike px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">👎</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">↺ Regenerate</button>
+          </div>
+        </div>
+      </div>`;
+    mainContent.insertAdjacentHTML('beforeend', html);
   }
 
   function escapeHtml(s) {
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
-  // ---- CODE FENCE (```...```) FORMATTER ----
+  function scrollToBottom() {
+    mainContent.scrollTop = mainContent.scrollHeight;
+  }
+
   function formatTripleBackticks() {
     const blocks = document.querySelectorAll(".ai-msg > div");
     const fence  = /```(\w+)?\n([\s\S]*?)```/g;
-
     blocks.forEach(node => {
-      const original = node.textContent;
+      const original = node.textContent || '';
       if (!original.includes("```")) return;
-
       let last = 0, html = "", m;
       while ((m = fence.exec(original)) !== null) {
         html += escapeHtml(original.slice(last, m.index)).replace(/\n/g, "<br/>");
-        html += `
-          <pre class="bg-gray-900 text-gray-100 text-sm p-3 rounded-lg my-3 overflow-x-auto">
-            <code class="block">${escapeHtml(m[2])}</code>
-          </pre>`;
+        html += `<pre class="bg-gray-900 text-gray-100 text-sm p-3 rounded-lg my-3 overflow-x-auto"><code class="block">${escapeHtml(m[2])}</code></pre>`;
         last = fence.lastIndex;
       }
       html += escapeHtml(original.slice(last)).replace(/\n/g, "<br/>");
@@ -206,7 +269,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- RIGHT SIDEBAR TOGGLE + PERSIST ----
+  function wireCopyButtons() {
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', () => {
+        const text = btn.dataset.content || btn.closest('.ai-msg')?.innerText || '';
+        navigator.clipboard?.writeText(text).then(
+          () => { btn.textContent = 'Copied'; setTimeout(()=>btn.textContent='Copy', 1000); },
+          () => { btn.textContent = 'Copy'; }
+        );
+      });
+    });
+  }
+
+  function wireActionButtons() {
+    document.querySelectorAll('.btn-regenerate').forEach(btn => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', () => {
+        btn.textContent = '↺';
+      });
+    });
+  }
+
+  // Right sidebar toggle
   function applyRightState() {
     const collapsed = getFlag(RIGHT_KEY, false);
     if (collapsed) {
@@ -221,7 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
       rightBtn.textContent = "«";
     }
   }
-
   if (rightBtn) {
     rightBtn.addEventListener("click", () => {
       setFlag(RIGHT_KEY, !getFlag(RIGHT_KEY, false));
@@ -234,12 +320,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function adjustBottomPadding() {
     const h = chatForm ? chatForm.offsetHeight + 24 : 24;
     mainContent.style.paddingBottom = `${h}px`;
+    scrollToBottom();
   }
   adjustBottomPadding();
   window.addEventListener("resize", adjustBottomPadding);
 
-  // initial formatting for already-rendered messages
+  // initial wiring for any pre-rendered content
   formatTripleBackticks();
+  wireCopyButtons();
+  wireActionButtons();
 });
 </script>
 {% endblock %}
+
