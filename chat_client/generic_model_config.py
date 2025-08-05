@@ -21,12 +21,6 @@ def read_model_config():
     
 MODEL_REGISTRY = read_model_config()
 
-# def get_model_handler(model_id):
-#     model_info = MODEL_REGISTRY[model_id]
-#     module = import_module(model_info["module"])
-#     func = getattr(module, model_info["function"])
-#     return func
-
 def get_model_handler(model_key):
     model_config = MODEL_REGISTRY.get(model_key)
 

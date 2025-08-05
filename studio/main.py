@@ -2,13 +2,16 @@ import os
 import uuid
 from pathlib import Path
 from typing import Dict, List
-
+from starlette.requests import Request
 from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+from starlette.middleware import Middleware
 from docx import Document
 import uvicorn
 
@@ -29,14 +32,30 @@ from tools.RAG.rag_routes import router as rag_router
 from tools.MARKDOWN.md_routes import router as md_router
 from tools.DOCGEN.docgen_routes import router as docgen_router
 
-app = FastAPI()
+class AuthContextMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        session = request.session  # Now this is safe
+        user_id = session.get("user_id")
+        print("Session user_id:", user_id)
+        if user_id:
+            request.state.user = {"id": user_id, "name": "Test User"}
+        else:
+            request.state.user = None
+        return await call_next(request)
 
-app.add_middleware(SessionMiddleware, secret_key="Shivaa@2025")
+middleware = [
+    Middleware(SessionMiddleware, secret_key="Shivaa@2025"),
+    Middleware(AuthContextMiddleware)
+]
+
+# Initiating FastAPI app interfae post middleware defination. 
+app = FastAPI(middleware=middleware)
+
+# app.add_middleware(SessionMiddleware, secret_key="Shivaa@2025")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 app.mount("/static", StaticFiles(directory="studio/static"), name="static")
 templates.env.cache.clear()
-
 
 init_db()
 
@@ -72,10 +91,19 @@ async def generate_doc(request: Request, content: str = Form(...)):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {
+    # return templates.TemplateResponse("index.html", {
+    #     "request": request,
+    #     "models": MODEL_REGISTRY
+    # })
+    user = request.state.user
+    if user:
+        return templates.TemplateResponse("index.html", {
         "request": request,
         "models": MODEL_REGISTRY
     })
+    else:
+        # return RedirectResponse(url="/auth/login")
+        return RedirectResponse(url="/chat/public/")
 
 @app.get("/me/config")
 def get_config(
@@ -100,18 +128,6 @@ def me(user = Depends(get_current_user)):
 @app.get("/admin/metrics")
 def metrics(user = Depends(require_roles("admin"))):
     return {"secret": "..." }
-
-
-@app.middleware("auth_context")
-async def add_user_to_context(request: Request, call_next):
-    user = None
-    try:
-        user = get_current_user(request)
-    except:
-        pass
-    request.state.user = user
-    response = await call_next(request)
-    return response
 
 @app.get("/chat/{model_id}", response_class=HTMLResponse)
 async def get_chat_view(request: Request, model_id: str, conversation_name: str = Query(default=None)):
