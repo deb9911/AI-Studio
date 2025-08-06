@@ -28,7 +28,7 @@
             <div class="text-xs text-gray-400">{{ entry.ts or '' }}</div>
           </div>
           <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-blue-500">
-            <div class="whitespace-pre-wrap leading-relaxed">{{ entry.user | e }}</div>
+            <div class="whitespace-pre-wrap leading-relaxed text-sm">{{ entry.user | e }}</div>
           </div>
         </div>
       </div>
@@ -47,14 +47,21 @@
             </div>
           </div>
           <div class="ai-msg bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow border-l-4 border-green-500">
-            <div class="mt-2 whitespace-pre-wrap leading-relaxed">{{ entry.ai | e }}</div>
+            <div class="mt-2 whitespace-pre-wrap leading-relaxed text-sm">{{ entry.ai | e }}</div>
           </div>
+
 
           <!-- quick actions -->
           <div class="mt-2 flex gap-2 text-sm">
             <button class="btn-like px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">👍</button>
             <button class="btn-dislike px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">👎</button>
             <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">↺ Regenerate</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">📄 MD Conversion</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">📝 Doc Conversion</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">✏️ Edit as Query</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">💾 Save for later</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">🗑️ Delete</button>
+            <button class="btn-regenerate px-2 py-1 bg-transparent rounded hover:bg-gray-200 dark:hover:bg-gray-600">📌 Grab into context</button>
           </div>
         </div>
       </div>
