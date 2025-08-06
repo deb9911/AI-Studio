@@ -1,4 +1,3 @@
-# studio/routes/chat_routes.py
 from pathlib import Path
 from typing import Dict, List
 
@@ -17,7 +16,6 @@ DEFAULT_MODEL_ID = "mixtral"
 
 # very simple in‑memory store (move to Redis/DB later)
 conversations_store: Dict[str, List[Dict[str, str]]] = {}
-
 
 # ---------- NEW: /chat entry ----------
 @router.get("/", response_class=HTMLResponse)
@@ -40,9 +38,6 @@ async def get_chat_view(
     conversation_name: str = Query(default=None),
 ):
     print(f"Model used: {model_id}")
-    # handler = get_model_handler(model_id)
-    # if not handler:
-    #     return {"error": f"No handler found for model: {model_id}"}
     
     user_id = request.session.get("user_id")
     template = "chat_guest.html" if not user_id else "chat.html"
@@ -63,7 +58,6 @@ async def get_chat_view(
             "models": MODEL_REGISTRY,
         },
     )
-
 
 @router.post("/public/send")
 async def guest_chat_send(user_input: str = Form(...)):

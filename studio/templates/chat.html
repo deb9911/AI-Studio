@@ -156,26 +156,31 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!userText) return;
 
       appendUserBubble(userText);
-      userInput.value = '';
+      userInput.value = '';          // OK to clear visually
       adjustBottomPadding();
       scrollToBottom();
       sendSpinner.classList.remove('hidden');
 
       const formData = new FormData(chatForm);
+      // FIX: ensure the user text is actually sent
+      formData.set('user_input', userText);
+
       const url = chatForm.getAttribute("action") || `/chat/{{ agent }}/send`;
+
+      console.log('formData entries:', [...formData.entries()]);
 
       try {
         const res = await fetch(url, { method: "POST", body: formData });
         const data = await res.json();
 
-        appendAIBubble(data.ai || "❌ No response received from model.");
+        appendAIBubble(data.ai || " No response received from model.");
         wireCopyButtons();
         wireActionButtons();
         formatTripleBackticks();
         scrollToBottom();
       } catch (err) {
         console.error(err);
-        appendAIBubble("❌ Error contacting model.");
+        appendAIBubble(" Error contacting model.");
         scrollToBottom();
       } finally {
         sendSpinner.classList.add('hidden');
