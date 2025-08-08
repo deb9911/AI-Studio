@@ -73,7 +73,7 @@
 </div>
 
 <!-- INPUT FORM -->
-<form id="chatForm"
+<!--form id="chatForm"
       method="post"
       action="/chat/{{ agent }}/send"
       class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200">
@@ -92,6 +92,35 @@
     <span>➤</span>
     <span id="sendSpinner" class="hidden animate-spin">⏳</span>
   </button>
+</form-->
+<form id="chatForm"
+      method="post"
+      action="/chat/{{ agent }}/send"
+      class="fixed bottom-0 left-64 right-16 bg-white dark:bg-gray-800 p-4 flex gap-3 border-t border-gray-200 dark:border-gray-700 z-50 transition-all duration-200">
+
+  {% if not conversation_name %}
+    <input type="text"
+           name="conversation_name"
+           placeholder="Name this conversation..."
+           required
+           class="px-4 py-2 w-48 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  {% else %}
+    <input type="hidden" name="conversation_name" value="{{ conversation_name }}" />
+  {% endif %}
+
+  <textarea name="user_input"
+            id="user_input"
+            rows="2"
+            placeholder="Send a message..."
+            required
+            class="px-4 py-2 flex-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-150"></textarea>
+
+  <button id="sendBtn"
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 transition-colors duration-200">
+    <span class="text-xl">➤</span>
+    <span id="sendSpinner" class="hidden animate-spin text-sm">⏳</span>
+  </button>
 </form>
 
 <!-- RIGHT SIDEBAR -->
@@ -102,7 +131,10 @@
       «
   </button>
 
-  <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Tools</h2>
+  <h1 class="text-lg uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Studio Configuration
+  </h1>
+  <h3 class="text-xs font-semibold text-gray-800 dark:text-white">Tools</h3>
 
   <div class="flex items-center gap-2">
     <!-- Import -->
@@ -116,6 +148,24 @@
     <!-- Export -->
     <a href="/tools/context_manager/context/export"
        class="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded shadow">📤</a>
+  </div>
+  <!-- Temperature Control -->
+  <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Creativity - Temparature
+  </h3>
+  <div class="control-section">
+    <label for="temperature-slider">Creativity (Temperature)</label>
+    <input type="range" id="temperature-slider" min="0" max="1" step="0.01" value="{{ temperature|default(0.7) }}">
+    <span id="temp-value">{{ temperature|default(0.7) }}</span>
+  </div>
+  <!-- System Prompt Editor -->
+  <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Edit Prompt
+  </h3>
+  <div class="control-section">
+    <label for="system-prompt">System Prompt</label>
+    <textarea id="system-prompt" rows="6">{{ system_prompt|default("You are a helpful assistant.") }}</textarea>
+    <button id="save-system-prompt">Save</button>
   </div>
 </aside>
 <style>
@@ -177,6 +227,49 @@
   button:hover {
     background-color: #f3f4f6;
     color: #111827;
+  }
+
+  .input-container {
+  display: flex;
+  align-items: flex-end;
+  padding: 0.5rem;
+  border-top: 1px solid #ccc;
+  background: #fff;
+  position: sticky;
+  bottom: 0;
+}
+
+  #userInput:focus {
+    outline: none;
+    background: #fff;
+  }
+
+  #send-button {
+    margin-left: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #3f83f8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  #send-button:hover {
+    background: #2f6fe4;
+  }
+  #userinput {
+    height: auto;
+    min-height: 2.5rem;
+    max-height: 12rem;
+    overflow-y: hidden;
+    resize: none;
+    line-height: 1.4;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: height 0.2s ease;
+    box-sizing: border-box;
   }
 </style>
 {% endblock %}
@@ -412,6 +505,36 @@ document.addEventListener("DOMContentLoaded", () => {
   wireActionButtons();
   Prism.highlightAll();
 });
+function resizeInput(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight) + 'px';
+  }
+
+  // Optional: Reset size when input is empty
+  const inputBox = document.getElementById("user_input");
+
+  if (inputBox) {
+    inputBox.addEventListener("input", function () {
+      this.style.height = "auto";
+      this.style.height = Math.min(this.scrollHeight, 192) + "px"; // cap at 12rem
+    });
+
+    // Optional: reset height on blur if cleared
+    inputBox.addEventListener("blur", function () {
+      if (!this.value.trim()) {
+        this.style.height = "2.5rem";
+      }
+    });
+
+    // Initial adjust in case pre-filled
+    inputBox.style.height = "auto";
+    inputBox.style.height = inputBox.scrollHeight + "px";
+    }
+    document.getElementById("temperature-slider")?.addEventListener("input", (e) => {
+    const tempVal = e.target.value;
+    document.getElementById("temp-value").innerText = tempVal;
+    // Optionally send via AJAX to store per-session
+  });
 </script>
 {% endblock %}
 

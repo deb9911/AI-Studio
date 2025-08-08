@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Dict, List
 
 from fastapi import APIRouter, Form, Query, Request, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.params import Body
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
@@ -93,4 +94,23 @@ async def post_chat_message(
         conversations_store[conversation_name].append({"user": user_input, "ai": ai_response})
 
     return {"user": user_input, "ai": ai_response}
+
+
+@router.post("/save_system_prompt")
+async def save_system_prompt(data: dict = Body(...)):
+    prompt = data.get("prompt")
+    # Save to DB/session store
+    return {"status": "success", "saved_prompt": prompt}
+
+
+@router.get("/export_session/{session_id}.{fmt}")
+def export_session(session_id: str, fmt: str):
+    # Get session data
+    if fmt == "pdf":
+        # render PDF
+        ...
+    elif fmt == "md":
+        # generate markdown
+        ...
+    return FileResponse(...)
 
