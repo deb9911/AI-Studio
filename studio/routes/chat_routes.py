@@ -1,9 +1,9 @@
-# studio/routes/chat_routes.py
 from pathlib import Path
 from typing import Dict, List
 
-from fastapi import APIRouter, Form, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Form, Query, Request, HTTPException
+from fastapi.params import Body
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
@@ -12,11 +12,11 @@ templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent
 
 router = APIRouter()
 
-DEFAULT_MODEL_ID = next(iter(MODEL_REGISTRY.keys()))
+# DEFAULT_MODEL_ID = next(iter(MODEL_REGISTRY.keys()))
+DEFAULT_MODEL_ID = "mixtral"
 
 # very simple in‑memory store (move to Redis/DB later)
 conversations_store: Dict[str, List[Dict[str, str]]] = {}
-
 
 # ---------- NEW: /chat entry ----------
 @router.get("/", response_class=HTMLResponse)
@@ -32,7 +32,6 @@ async def chat_entry(request: Request):
         )
     return RedirectResponse(url=f"/chat/{DEFAULT_MODEL_ID}", status_code=303)
 
-
 @router.get("/{model_id}", response_class=HTMLResponse)
 async def get_chat_view(
     request: Request,
@@ -40,9 +39,6 @@ async def get_chat_view(
     conversation_name: str = Query(default=None),
 ):
     print(f"Model used: {model_id}")
-    # handler = get_model_handler(model_id)
-    # if not handler:
-    #     return {"error": f"No handler found for model: {model_id}"}
     
     user_id = request.session.get("user_id")
     template = "chat_guest.html" if not user_id else "chat.html"
@@ -64,6 +60,15 @@ async def get_chat_view(
         },
     )
 
+@router.post("/public/send")
+async def guest_chat_send(user_input: str = Form(...)):
+    handler = get_model_handler(DEFAULT_MODEL_ID)
+    if not handler:
+        return {"error": f"No handler found for model Default Model"}
+    ai_response = handler(user_input)
+    print(f"Model used: {handler}\nInput: {user_input}\nResponse: {ai_response}")
+    return {"user": user_input, "ai": ai_response}
+
 
 @router.post("/{model_id}/send")
 async def post_chat_message(
@@ -74,6 +79,10 @@ async def post_chat_message(
 ):
     if not conversation_name:
         conversation_name = "guest"
+    print(f'model_id=>\t{model_id}')
+
+    if model_id not in MODEL_REGISTRY:
+        raise HTTPException(status_code=400, detail=f"Invalid model id: {model_id}")
 
     handler = get_model_handler(model_id)
     ai_response = handler(user_input) if handler else "Error: No valid model handler"
@@ -87,11 +96,21 @@ async def post_chat_message(
     return {"user": user_input, "ai": ai_response}
 
 
-@router.post("/public/send")
-async def guest_chat_send(user_input: str = Form(...)):
-    handler = get_model_handler(DEFAULT_MODEL_ID)
-    if not handler:
-        return {"error": f"No handler found for model Default Model"}
-    ai_response = handler(user_input)
-    print(f"Model used: {handler}\nInput: {user_input}\nResponse: {ai_response}")
-    return {"user": user_input, "ai": ai_response}
+@router.post("/save_system_prompt")
+async def save_system_prompt(data: dict = Body(...)):
+    prompt = data.get("prompt")
+    # Save to DB/session store
+    return {"status": "success", "saved_prompt": prompt}
+
+
+@router.get("/export_session/{session_id}.{fmt}")
+def export_session(session_id: str, fmt: str):
+    # Get session data
+    if fmt == "pdf":
+        # render PDF
+        ...
+    elif fmt == "md":
+        # generate markdown
+        ...
+    return FileResponse(...)
+

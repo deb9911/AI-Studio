@@ -8,12 +8,25 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          colors: { primary: '#007bff' }
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          },
+          fontSize: {
+            base: '15px',
+            sm: '13px',
+          },
+          colors: {
+            primary: '#3b82f6', // Tailwind Blue-500
+            accent: '#22c55e',  // Green-500
+            danger: '#ef4444',  // Red-500
+          },
         }
       }
     };
@@ -33,81 +46,86 @@
     body {
       transition: background-color 0.3s ease, color 0.3s ease;
     }
+    .dark .shadow-sm {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
   </style>
 
   {% block head_extra %}{% endblock %}
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!--script src="https://unpkg.com/lucide@latest"></script-->
+  <script src="https://unpkg.com/lucide@0.271.0"></script>
 </head>
 
 <body class="bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen flex flex-col">
 
   <!-- Top Navbar -->
   <header class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-    <div class="flex justify-between items-center px-4 py-2">
-      <!-- Left Section -->
-      <div class="flex items-center gap-4">
-        <button onclick="toggleSidebar()" title="Toggle Sidebar" aria-label="Toggle Sidebar"
-          class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded">☰</button>
-        <span class="text-xl font-semibold">KUCHU-AI Studio</span>
-        <select class="bg-gray-100 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded shadow">
-          <option>Default Workspace</option>
-          <option>Project 1</option>
-          <option>Project 2</option>
-        </select>
-      </div>
+  <div class="flex justify-between items-center px-4 py-2">
+    <!-- Left Section -->
+    <div class="flex items-center gap-4">
+      <button onclick="toggleSidebar()" title="Toggle Sidebar" aria-label="Toggle Sidebar"
+              class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded"><i data-lucide="menu" class="w-5 h-5"></i></button>
+      <span class="text-xl font-semibold whitespace-nowrap">KUCHU-AI Studio</span>
 
-      <!-- Right Section -->
-      <div class="flex items-center gap-3">
-        {% if request.session.get('user_id') %}
-          <span class="text-sm opacity-70">Signed in</span>
-          <form action="/auth/logout" method="post">
-            <button class="px-3 py-1 rounded bg-red-500 text-white text-sm">Logout</button>
-          </form>
-        {% else %}
-          <a href="/auth/login" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Login</a>
-          <a href="/auth/register" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Register</a>
-        {% endif %}
-
-        <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
-                class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-3 py-1 rounded shadow">🌓</button>
-      </div>
+      <select class="bg-gray-100 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded shadow">
+        <option>Default Workspace</option>
+        <option>Project 1</option>
+        <option>Project 2</option>
+      </select>
     </div>
 
-    <!-- Tabs -->
-    <nav class="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-      <div class="px-4 py-1 flex gap-4 text-sm">
-        <a href="/chat" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">💬 Chat Utilities</a>
-        <a href="/tools" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">🛠 Tools Manager</a>
-        <a href="/logs" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">📁 Logs Manager</a>
-        <a href="/settings" class="px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800">⚙️ Settings</a>
-      </div>
-    </nav>
-  </header>
+    <!-- Right Section -->
+    <div class="flex items-center gap-3">
+      {% if request.session.get('user_id') %}
+        <span class="text-sm opacity-70">Signed in</span>
+        <form action="/auth/logout" method="post">
+          <button class="px-3 py-1 rounded bg-red-500 text-white text-sm">Logout</button>
+        </form>
+      {% else %}
+        <a href="/auth/login" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Login</a>
+        <a href="/auth/register" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-700">Register</a>
+      {% endif %}
+
+      <button onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"
+              class="bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-2 py-1 rounded shadow"><i data-lucide="sun-moon" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+</header>
 
   <!-- Layout -->
-  <div class="flex flex-1 pt-28 overflow-hidden">
+  <div class="flex flex-1 pt-28 overflow-y-auto h-[calc(100vh-56px)]">
   <!-- Full Sidebar -->
   <!-- Expanded Sidebar (unchanged unless you want Chat as direct link instead of dropdown) -->
 <aside id="sidebar"
-  class="fixed top-28 left-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
-         transition-transform duration-300 z-30">
+  class="fixed top-[56px] left-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto transition-transform duration-300 z-30">
   <div class="p-4 space-y-6 text-sm text-black dark:text-white">
-
+    <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Your Dashboard
+    </h3>
     <!-- Direct Links -->
     <a href="/" class="flex items-center gap-2 hover:text-primary">
       <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
     </a>
+    <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Workspace & Projects
+    </h3>
     <a href="/projects" class="flex items-center gap-2 hover:text-primary">
       <i data-lucide="flask-conical" class="w-5 h-5"></i> Projects
     </a>
+    <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      App settings
+    </h3>
     <a href="/settings" class="flex items-center gap-2 hover:text-primary">
       <i data-lucide="settings" class="w-5 h-5"></i> Settings
     </a>
 
     <!-- Chat Dropdown -->
+     <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      All recent sessions
+    </h3>
     <details class="group mt-2" open>
       <summary class="cursor-pointer flex items-center gap-2 hover:text-primary">
-        <i data-lucide="message-square-dots" class="w-5 h-5"></i> Conversation
+        <i data-lucide="message-square" class="w-5 h-5"></i> Conversation
       </summary>
       <div class="ml-6 mt-1 space-y-1">
         {% if conversations %}
@@ -117,9 +135,29 @@
             </summary>
             <div class="ml-4 mt-1 space-y-1">
               {% for cname in conversations.keys() %}
-                <a href="/chat/{{ agent }}?conversation_name={{ cname }}" class="block hover:text-primary">
-                  📝 {{ cname }}
-                </a>
+                <div class="group flex flex-col gap-1 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                  <!-- Session Link + Rename -->
+                  <div class="flex items-center gap-2">
+                    <a href="/chat/{{ agent }}?conversation_name={{ cname }}"
+                      class="text-sm font-medium text-primary hover:underline flex-1 truncate">
+                      📝 {{ cname }}
+                    </a>
+                    <button title="Rename Session" class="rename-btn text-xs text-gray-500 hover:text-primary">✏️</button>
+                  </div>
+
+                  <!-- Inline editable field (optional toggle behavior later via JS) -->
+                  <input type="text"
+                        class="rename-input hidden w-full px-2 py-1 text-sm rounded bg-gray-100 dark:bg-gray-700"
+                        value="{{ cname }}" data-original="{{ cname }}" />
+
+                  <!-- Export Options -->
+                  <div class="flex items-center gap-2 mt-1 ml-1">
+                    <a href="/export_session/{{ cname }}.pdf"
+                      class="text-xs text-blue-600 dark:text-blue-400 hover:underline">📄 PDF</a>
+                    <a href="/export_session/{{ cname }}.md"
+                      class="text-xs text-green-600 dark:text-green-400 hover:underline">📝 Markdown</a>
+                  </div>
+                </div>
               {% endfor %}
             </div>
           </details>
@@ -130,6 +168,9 @@
     </details>
 
     <!-- Explore Models Dropdown -->
+    <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Model checkout
+    </h3>
     <details class="group mt-2">
       <summary class="cursor-pointer flex items-center gap-2 hover:text-primary">
         <i data-lucide="cpu" class="w-5 h-5"></i> Explore Models
@@ -145,34 +186,11 @@
 
 <!-- Mini Ribbon Sidebar -->
 <aside id="sidebar-ribbon"
-  class="fixed top-28 left-0 bottom-0 w-12 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
-         transition-transform duration-300 z-30 hidden flex-col items-center py-4 space-y-8
-         text-gray-600 dark:text-gray-300">
+  class="fixed top-[56px] left-0 bottom-0 w-12 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
+         transition-transform duration-300 z-30 flex-col items-center py-4
+         text-gray-600 dark:text-gray-300 hidden">
 
-  <!-- Add spacing using space-y-6 -->
-  <a href="/" title="Dashboard" class="hover:text-primary">
-    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-  </a>
-  <a href="/projects" title="Projects" class="hover:text-primary">
-    <i data-lucide="flask-conical" class="w-5 h-5"></i>
-  </a>
-  <a href="/settings" title="Settings" class="hover:text-primary">
-    <i data-lucide="settings" class="w-5 h-5"></i>
-  </a>
-  <a href="/chat" title="Conversation" class="hover:text-primary">
-    <i data-lucide="message-square-dots" class="w-5 h-5"></i>
-  </a>
-  <a href="/chat/explore" title="Explore Models" class="hover:text-primary">
-    <i data-lucide="cpu" class="w-5 h-5"></i>
-  </a>
-
-</aside>
-
-
-  <!-- Mini Ribbon Sidebar -->
-  <aside id="sidebar-ribbon"
-        class="fixed top-28 left-0 bottom-0 w-12 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto
-                transition-transform duration-300 z-30 hidden flex-col items-center py-4 space-y-12 text-gray-600 dark:text-gray-300">
+  <div class="flex flex-col items-center space-y-6 sm:space-y-8 md:space-y-10">
     <a href="/" title="Dashboard" class="hover:text-primary">
       <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
     </a>
@@ -183,18 +201,18 @@
       <i data-lucide="settings" class="w-5 h-5"></i>
     </a>
     <a href="/chat" title="Conversation" class="hover:text-primary">
-      <i data-lucide="message-square-dots" class="w-5 h-5"></i>
+      <i data-lucide="message-square" class="w-5 h-5"></i>
     </a>
-    <a href="/chat" title="Explore Model" class="hover:text-primary">
-      <i data-lucide="message-square-dots" class="w-5 h-5"></i>
+    <a href="/chat/explore" title="Explore Models" class="hover:text-primary">
+      <i data-lucide="cpu" class="w-5 h-5"></i>
     </a>
-  </aside>
+  </div>
 
-
+</aside>
 
     <!-- Main Content Area -->
     <main id="main-content"
-          class="flex-1 overflow-y-auto px-4 py-6 transition-all duration-300">
+          class="ml-64 flex-1 px-4 py-6 pb-20 transition-all duration-300 overflow-y-auto">
       {% block content %}{% endblock %}
     </main>
   </div>
@@ -239,7 +257,11 @@
       applyLeftSidebarState();
     }
 
-    document.addEventListener('DOMContentLoaded', applyLeftSidebarState);
+    // document.addEventListener('DOMContentLoaded', applyLeftSidebarState);
+    document.addEventListener('DOMContentLoaded', () => {
+      applyLeftSidebarState();
+      lucide.createIcons();  // Move into DOMContentLoaded if needed
+      });
 
     function toggleTheme() {
       const html = document.documentElement;
@@ -251,11 +273,69 @@
     if (new URLSearchParams(window.location.search).get("imported") === "true") {
       alert("✅ Context imported successfully!");
     }
+
+    document.getElementById("save-system-prompt")?.addEventListener("click", () => {
+    const prompt = document.getElementById("system-prompt").value;
+    fetch("/save_system_prompt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    }).then(res => res.json()).then(data => {
+      alert("System prompt saved.");
+    });
+  });
+  document.querySelectorAll('.rename-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const container = btn.closest('.group');
+      const input = container.querySelector('.rename-input');
+      const link = container.querySelector('a');
+      input.classList.toggle('hidden');
+      if (!input.classList.contains('hidden')) {
+        input.focus();
+      }
+    });
+  });
+
+  // Optional: Save on Enter key
+  document.querySelectorAll('.rename-input').forEach(input => {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const newName = input.value.trim();
+        const original = input.dataset.original;
+        if (newName && newName !== original) {
+          // TODO: Add rename request to server here
+          alert(`Rename "${original}" to "${newName}"`);
+        }
+        input.classList.add('hidden');
+      }
+    });
+  });
   </script>
 
   {% block script_extra %}{% endblock %}
   <script>
     lucide.createIcons();
   </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: rgba(120, 120, 120, 0.3);
+      border-radius: 4px;
+    }
+
+    .dark .shadow-sm {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+  </style>
 </body>
 </html>

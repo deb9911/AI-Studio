@@ -5,14 +5,6 @@ from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory="studio/templates")
 
-# ---------- Home Page ----------
-# @router.get("/", response_class=HTMLResponse)
-# def home(request: Request):
-#     # If user is logged in, redirect to /chat
-#     if request.session.get("user_id"):
-#         return RedirectResponse(url="/chat", status_code=302)
-#     return templates.TemplateResponse("home.html", {"request": request})
-
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("base.html", {
