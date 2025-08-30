@@ -3,13 +3,17 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import requests
 import feedparser
+import logging
 
 router = APIRouter()
 templates = Jinja2Templates(directory="studio/templates")
+logger = logging.getLogger(__name__)
+
 
 @router.get("/api/news")
 def get_news():
     # Add switcher for change region so user can change location to get associated info in dashboard.  
+    logger.info("Get news initiated")
     rss_url = "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
     feed = feedparser.parse(rss_url)
 
@@ -32,13 +36,3 @@ def get_news():
 
     return {"news": news_list}
 
-
-# def test_reuters():
-#     rss_url = "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
-#     feed = feedparser.parse(rss_url)
-
-#     print("Total Entries:", len(feed.entries))
-#     for entry in feed.entries[:3]:
-#         print(entry.title)
-
-# test_reuters()

@@ -8,7 +8,7 @@
     <h2 class="text-xl font-semibold mb-2">Available Models</h2>
     <div class="flex flex-wrap gap-2">
       {% for model_name in models.keys() %}
-        <a href="/chat/{{ model_name }}" class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition">
+        <a href="/chat/model/{{ model_name }}" class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition">
           {{ model_name }}
         </a>
       {% endfor %}

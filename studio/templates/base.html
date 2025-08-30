@@ -134,13 +134,13 @@
               <i data-lucide="folder-open" class="w-4 h-4"></i> Sessions
             </summary>
             <div class="ml-4 mt-1 space-y-1">
-              {% for cname in conversations.keys() %}
+              {% for convo in conversations %}
                 <div class="group flex flex-col gap-1 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
                   <!-- Session Link + Rename -->
                   <div class="flex items-center gap-2">
-                    <a href="/chat/{{ agent }}?conversation_name={{ cname }}"
+                    <a href="/chat/conversation/{{ convo.id }}"
                       class="text-sm font-medium text-primary hover:underline flex-1 truncate">
-                      📝 {{ cname }}
+                      📝 {{ convo.name }}
                     </a>
                     <button title="Rename Session" class="rename-btn text-xs text-gray-500 hover:text-primary">✏️</button>
                   </div>
@@ -148,13 +148,13 @@
                   <!-- Inline editable field (optional toggle behavior later via JS) -->
                   <input type="text"
                         class="rename-input hidden w-full px-2 py-1 text-sm rounded bg-gray-100 dark:bg-gray-700"
-                        value="{{ cname }}" data-original="{{ cname }}" />
+                        value="{{ convo.name }}" data-original="{{ convo.name }}" />
 
                   <!-- Export Options -->
                   <div class="flex items-center gap-2 mt-1 ml-1">
-                    <a href="/export_session/{{ cname }}.pdf"
+                    <a href="/export_session/{{ convo.name }}.pdf"
                       class="text-xs text-blue-600 dark:text-blue-400 hover:underline">📄 PDF</a>
-                    <a href="/export_session/{{ cname }}.md"
+                    <a href="/export_session/{{ convo.name }}.md"
                       class="text-xs text-green-600 dark:text-green-400 hover:underline">📝 Markdown</a>
                   </div>
                 </div>
@@ -177,7 +177,7 @@
       </summary>
       <div class="ml-6 mt-1 space-y-1">
         {% for model_name in models.keys() %}
-          <a href="/chat/{{ model_name }}" class="block hover:text-primary">{{ model_name }}</a>
+          <a href="/chat/model/{{ model_name }}" class="block hover:text-primary">{{ model_name }}</a>
         {% endfor %}
       </div>
     </details>

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Form, Response, HTTPException, Request
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
+import logging
 
 from studio.services.db import get_session
 from studio.services.crud import create_user, authenticate_user
@@ -23,16 +24,17 @@ cookie_params = dict(
     samesite="lax",
     domain=COOKIE_DOMAIN or None,   # allow localhost
 )
+logger = logging.getLogger(__name__)
 
 # ---------- Pages ----------
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
-    # return templates.TemplateResponse("login.html", {"request": request})
+    logger.info('Defined [login_page] is initiated ')
     return templates.TemplateResponse("login.html", {"request": request, "models": {}})
 
 @router.get("/register", response_class=HTMLResponse)
 def register_page(request: Request):
-    # return templates.TemplateResponse("register.html", {"request": request})
+    logger.info('Defined [register_page] is initiated ')
     return templates.TemplateResponse("register.html", {"request": request, "models": {}})
 
 # ---------- Registration ----------
@@ -44,6 +46,7 @@ def register(
     role: str = Form("user"),
     session: Session = Depends(get_session)
 ):
+    logger.info('Defined [register] is initiated ')
     create_user(session, email, password, role)
     return RedirectResponse(url="/auth/login", status_code=303)  # <<< redirect
 
@@ -55,6 +58,7 @@ def login(
     password: str = Form(...),
     session_db: Session = Depends(get_session)
 ):
+    logger.info('Defined [login] is initiated ')
     user = authenticate_user(session_db, email, password)
     if not user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -74,6 +78,7 @@ def login(
 # ---------- Refresh ----------
 @router.post("/refresh")
 def refresh_token(response: Response, refresh_token: str = Form(...)):
+    logger.info('Defined [refresh_token] is initiated ')
     try:
         payload = decode_token(refresh_token)
         if payload.get("typ") != "refresh":
@@ -90,6 +95,7 @@ def refresh_token(response: Response, refresh_token: str = Form(...)):
 # ---------- Logout ----------
 @router.post("/logout")
 def logout(request: Request):
+    logger.info('Defined [logout] is initiated ')
     request.session.clear()  # clear server-side session
     resp = RedirectResponse(url="/chat", status_code=303)  # <<< back to guest chat
     resp.delete_cookie("access_token", domain=COOKIE_DOMAIN or None)

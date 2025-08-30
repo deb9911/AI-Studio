@@ -7,13 +7,15 @@ from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session
+from fastapi.responses import FileResponse
+from sqlmodel import Session, select
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.middleware import Middleware
 from docx import Document
 import uvicorn
+import logging
 
 # Chat & model handling
 from chat_client.generic_model_config import MODEL_REGISTRY, get_model_handler
@@ -23,6 +25,7 @@ from studio.routes import auth_routes, config_routes, chat_routes, newsdata_rout
 from studio.services.db import init_db, get_session
 from studio.dependency import get_current_user, require_roles
 from studio.services.config_manager import load_user_config_db, save_user_config_db
+from studio.services.db import get_user_sessions
 # from studio.settings import DEFAULT_USER_CONFIG 
 
 # Tool routes
@@ -32,13 +35,24 @@ from tools.RAG.rag_routes import router as rag_router
 from tools.MARKDOWN.md_routes import router as md_router
 from tools.DOCGEN.docgen_routes import router as docgen_router
 
+
+logging.basicConfig(
+    level=logging.DEBUG,  # or INFO
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+logger.info("Logger initiated")
+
 class AuthContextMiddleware(BaseHTTPMiddleware):
+    logger.info(f"{__name__}\t- [initiated]")
     async def dispatch(self, request: StarletteRequest, call_next):
+        logger.info(f"{__name__}\t- [initiated]")
         session = request.session  # Now this is safe
         user_id = session.get("user_id")
-        print("Session user_id:", user_id)
         if user_id:
             request.state.user = {"id": user_id, "name": "Test User"}
+            print("Session user_id:", user_id)
         else:
             request.state.user = None
         return await call_next(request)
@@ -50,6 +64,7 @@ middleware = [
 
 # Initiating FastAPI app interfae post middleware defination. 
 app = FastAPI(middleware=middleware)
+logger.info(f"AI Studio\t- [initiated]")
 
 # app.add_middleware(SessionMiddleware, secret_key="Shivaa@2025")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -75,8 +90,14 @@ app.include_router(docgen_router, prefix="/tools/docgen")
     
 conversations_store: Dict[str, List[Dict[str, str]]] = {}  # {conversation_name: [ {"user":..., "ai":...}, ... ]}
 
+@app.get("/favicon.ico")
+async def favicon():
+    logger.info(f"favicon\t- [initiated]")
+    return FileResponse("studio/static/favicon.ico")
+
 @app.post("/generate-doc")
 async def generate_doc(request: Request, content: str = Form(...)):
+    logger.info(f"{__name__}\t- [initiated]")
     doc = Document()
     doc.add_heading("AI Response", level=1)
     doc.add_paragraph(content)
@@ -91,18 +112,21 @@ async def generate_doc(request: Request, content: str = Form(...)):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    # return templates.TemplateResponse("index.html", {
-    #     "request": request,
-    #     "models": MODEL_REGISTRY
-    # })
+    logger.info(f"{__name__}\t- [initiated]")
     user = request.state.user
     if user:
-        return templates.TemplateResponse("index.html", {
-        "request": request,
-        "models": MODEL_REGISTRY
-    })
+        logger.info(f"\n\nuser=>\n{user}\nid=>{user['id']}\n\n~~~~")
+        sessions = get_user_sessions(user['id'])  # fetch from DB
+        logger.info(f"\n\sessions=>\n{sessions}\n\n~~~~")
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "models": MODEL_REGISTRY,
+                "conversations": sessions,
+            }
+        )
     else:
-        # return RedirectResponse(url="/auth/login")
         return RedirectResponse(url="/chat/public/")
 
 @app.get("/me/config")
@@ -110,6 +134,7 @@ def get_config(
     user = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
+    logger.info(f"{__name__}\t- [initiated]")
     return load_user_config_db(session, user["id"], default={})
 
 @app.put("/me/config")
@@ -118,54 +143,21 @@ def update_config(
     user = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
+    logger.info(f"{__name__}\t- [initiated]")
     save_user_config_db(session, user["id"], body)
     return {"ok": True}
 
 @app.get("/me")
 def me(user = Depends(get_current_user)):
+    logger.info(f"{__name__}\t- [initiated]")
     return {"id": user.id, "email": user.email, "role": user.role}
 
 @app.get("/admin/metrics")
 def metrics(user = Depends(require_roles("admin"))):
+    logger.info(f"{__name__}\t- [initiated]")
     return {"secret": "..." }
-
-@app.get("/chat/{model_id}", response_class=HTMLResponse)
-async def get_chat_view(request: Request, model_id: str, conversation_name: str = Query(default=None)):
-    conversation = conversations_store.get(conversation_name, []) if conversation_name else []
-
-    return templates.TemplateResponse("chat.html", {
-        "request": request,
-        "agent": model_id,
-        "response": None,  # No new response
-        "user_input": None,
-        "conversation_name": conversation_name,
-        "conversation": conversation,
-        "conversations": conversations_store,
-        "models": MODEL_REGISTRY
-    })
-
-@app.post("/chat/{model_id}/send")
-async def post_chat_message(
-    model_id: str,
-    user_input: str = Form(...),
-    conversation_name: str = Form(...)
-):
-    handler = get_model_handler(model_id)
-    ai_response = handler(user_input)
-
-    # Store conversation
-    if conversation_name not in conversations_store:
-        conversations_store[conversation_name] = []
-    conversations_store[conversation_name].append({
-        "user": user_input,
-        "ai": ai_response
-    })
-
-    return JSONResponse({
-        "user": user_input,
-        "ai": ai_response
-    })
 
 
 if __name__ == "__main__":
+    logger.info(f"{__name__}\t- [initiated]")
     uvicorn.run("studio.main:app", host="127.0.0.1", port=8030, reload=True)
