@@ -163,7 +163,7 @@ async def post_chat_message(
 
     # Create new conversation if needed
     if not conversation_id:
-        form = request.form()
+        form = await request.form()
         user_provided_name = form.get("conversation_name", "").strip()
         if user_provided_name:
             title = user_provided_name
