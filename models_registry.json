@@ -1,13 +1,19 @@
 {
-  "llama3": {
-    "label": "LLaMA 3 (8B)",
-    "id": "meta-llama/Llama-3-8b-chat",
-    "provider": "together",
-    "type": "api"
-  },
   "mixtral": {
     "label": "Mixtral 8x7B",
     "id": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+    "provider": "together",
+    "type": "api"
+  },
+  "llama3-8b": {
+    "label": "LLaMA 3 (8B)",
+    "id": "meta-llama/Llama-3-8b-chat-hf",
+    "provider": "together",
+    "type": "api"
+  },
+  "llama3-70b": {
+    "label": "LLaMA 3 (70B)",
+    "id": "meta-llama/Llama-3-70b-chat-hf",
     "provider": "together",
     "type": "api"
   },
@@ -17,16 +23,40 @@
     "provider": "together",
     "type": "api"
   },
-  "zephyr": {
-    "label": "Zephyr 7B Beta",
-    "id": "HuggingFaceH4/zephyr-7b-beta",
-    "provider": "huggingface",
+  "qwen1.5-72b": {
+    "label": "Qwen1.5 (72B)",
+    "id": "Qwen/Qwen1.5-72B-Chat",
+    "provider": "together",
     "type": "api"
   },
-  "groq-llama3": {
-    "label": "Groq LLaMA3",
-    "id": "llama3-8b-8192",
-    "provider": "groq",
+  "qwen1.5-14b": {
+    "label": "Qwen1.5 (14B)",
+    "id": "Qwen/Qwen1.5-14B-Chat",
+    "provider": "together",
+    "type": "api"
+  },
+  "yi-34b": {
+    "label": "Yi-34B",
+    "id": "01-ai/Yi-34B-Chat",
+    "provider": "together",
+    "type": "api"
+  },
+  "falcon-180b": {
+    "label": "Falcon 180B",
+    "id": "tiiuae/falcon-180B-chat",
+    "provider": "together",
+    "type": "api"
+  },
+  "mpt-30b": {
+    "label": "MPT-30B",
+    "id": "mosaicml/mpt-30b-chat",
+    "provider": "together",
+    "type": "api"
+  },
+  "phixtral": {
+    "label": "Phixtral 12B",
+    "id": "Phind/Phixtral-12B",
+    "provider": "together",
     "type": "api"
   }
 }
