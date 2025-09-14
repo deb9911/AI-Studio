@@ -23,10 +23,11 @@
             sm: '13px',
           },
           colors: {
-            primary: '#3b82f6', // Tailwind Blue-500
-            accent: '#22c55e',  // Green-500
-            danger: '#ef4444',  // Red-500
-          },
+            primary: '#3b82f6',
+            accent: '#22c55e',
+            danger: '#ef4444',
+            amoled: '#000000', // pure black
+          }
         }
       }
     };
@@ -56,10 +57,10 @@
   <script src="https://unpkg.com/lucide@0.271.0"></script>
 </head>
 
-<body class="bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen flex flex-col">
+<body class="bg-white dark:bg-amoled text-black dark:text-white min-h-screen flex flex-col">
 
   <!-- Top Navbar -->
-  <header class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+  <header class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-amoled border-b border-gray-200 dark:border-gray-800 shadow-sm">
   <div class="flex justify-between items-center px-4 py-2">
     <!-- Left Section -->
     <div class="flex items-center gap-4">
@@ -93,11 +94,12 @@
 </header>
 
   <!-- Layout -->
-  <div class="flex flex-1 pt-28 overflow-y-auto h-[calc(100vh-56px)]">
+   <!--div class="flex flex-1 pt-14 overflow-y-auto h-[calc(100vh-56px)]"-->
+  <div class="flex flex-1 pt-28 overflow-y-auto h-[calc(100vh-56px)]"></div>
   <!-- Full Sidebar -->
   <!-- Expanded Sidebar (unchanged unless you want Chat as direct link instead of dropdown) -->
 <aside id="sidebar"
-  class="fixed top-[56px] left-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 border-r overflow-y-auto transition-transform duration-300 z-30">
+  class="fixed top-[56px] left-0 bottom-0 w-64 bg-gray-100 dark:bg-amoled border-r overflow-y-auto transition-transform duration-300 z-30">
   <div class="p-4 space-y-6 text-sm text-black dark:text-white">
     <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
       Your Dashboard
@@ -153,9 +155,25 @@
                   <!-- Export Options -->
                   <div class="flex items-center gap-2 mt-1 ml-1">
                     <a href="/export_session/{{ convo.name }}.pdf"
-                      class="text-xs text-blue-600 dark:text-blue-400 hover:underline">📄 PDF</a>
+                      class="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-primary hover:text-white transition"
+                      title="Export as PDF">
+                      <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </a>
                     <a href="/export_session/{{ convo.name }}.md"
-                      class="text-xs text-green-600 dark:text-green-400 hover:underline">📝 Markdown</a>
+                      class="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-green-500 hover:text-white transition"
+                      title="Export as Markdown">
+                      <i data-lucide="code" class="w-4 h-4"></i>
+                    </a>
+                    <!-- Delete -->
+                    <form action="/chat/delete_session/{{ convo.id }}" method="post"
+                      onsubmit="return confirm('Delete this conversation permanently?')" class="inline">
+                      <button type="submit"
+                        class="p-1.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-danger hover:text-white transition"
+                        title="Delete Conversation">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                      </button>
+                    </form>
+
                   </div>
                 </div>
               {% endfor %}
@@ -181,6 +199,35 @@
         {% endfor %}
       </div>
     </details>
+    <!-- Explore Expert Models Dropdown -->
+    <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Expert Models
+    </h3>
+    <details class="group mt-2">
+      <summary class="cursor-pointer flex items-center gap-2 hover:text-primary">
+        <i data-lucide="star" class="w-5 h-5"></i> Explore Expert Models
+      </summary>
+      <div class="ml-6 mt-1 space-y-1">
+        {% for model_name in models.keys() %}
+          <a href="/chat/model/{{ model_name }}" class="block hover:text-primary">{{ model_name }}</a>
+        {% endfor %}
+      </div>
+    </details>
+    <!-- Cloud Management -->
+    <h3 class="text-xs uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+      Cloud
+    </h3>
+    <details class="group mt-2">
+      <summary class="cursor-pointer flex items-center gap-2 hover:text-primary">
+        <i data-lucide="Cloud" class="w-5 h-5"></i> Cloud Management
+      </summary>
+      <div class="ml-6 mt-1 space-y-1">
+        {% for model_name in models.keys() %}
+          <a href="/chat/model/{{ model_name }}" class="block hover:text-primary">{{ model_name }}</a>
+        {% endfor %}
+      </div>
+    </details>
+    
   </div>
 </aside>
 
@@ -203,8 +250,18 @@
     <a href="/chat" title="Conversation" class="hover:text-primary">
       <i data-lucide="message-square" class="w-5 h-5"></i>
     </a>
+    <!--Here need to add & modify route targets for only minimied left side pane -->
     <a href="/chat/explore" title="Explore Models" class="hover:text-primary">
       <i data-lucide="cpu" class="w-5 h-5"></i>
+    </a>
+    <a href="/chat/explore" title="Explore Expert Models" class="hover:text-primary">
+      <i data-lucide="star" class="w-5 h-5"></i>
+    </a>
+    <a href="/chat/explore" title="Cloud Explorer" class="hover:text-primary">
+      <i data-lucide="Cloud" class="w-5 h-5"></i>
+    </a>
+    <a href="/chat/explore" title="Big function" class="hover:text-primary">
+      <i data-lucide="Rocket" class="w-5 h-5"></i>
     </a>
   </div>
 
@@ -313,9 +370,9 @@
   </script>
 
   {% block script_extra %}{% endblock %}
-  <script>
+  <!--script>
     lucide.createIcons();
-  </script>
+  </script-->
   <style>
     body {
       font-family: 'Inter', sans-serif;
