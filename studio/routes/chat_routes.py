@@ -241,3 +241,28 @@ def export_session(
         ...
 
     raise HTTPException(status_code=400, detail="Unsupported format")
+
+
+# ---------- Delete conversation ----------
+@router.post("/delete_session/{conversation_id}")
+async def delete_conversation_route(
+    request: Request,
+    conversation_id: int,
+    session_db: Session = Depends(get_session),
+):
+    logger.info(f'delete_conversation_route - Initiated for {conversation_id}')
+    user_id = request.session.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=403, detail="Login required")
+
+    conv = get_conversation(session_db, conversation_id, user_id)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    session_db.delete(conv)
+    session_db.commit()
+    logger.info(f'Conversation {conversation_id} deleted for user {user_id}')
+
+    # 👇 redirect to a new chat session with your default agent
+    return RedirectResponse(url="/chat/model/mixtral", status_code=303)
+

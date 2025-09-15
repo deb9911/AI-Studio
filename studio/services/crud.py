@@ -110,9 +110,9 @@ def update_conversation(db: Session, convo: Conversation):
 def delete_conversation(db: Session, convo_id: int, user_id: int):
     logger.info('\nDefined [delete_conversation] is initiated ')
     convo = get_conversation(db, convo_id, user_id)
-    if convo:
-        db.delete(convo)
-        db.commit()
-        return True
-    return False
+    if not convo:
+        return None
+    db.delete(convo)
+    db.commit()
+    return True
 

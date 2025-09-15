@@ -7,3 +7,6 @@
 /studio/__pycache__/main.cpython-312.pyc
 /venv-ai/
 *.pyc
+*.db
+*.sqlite3
+
